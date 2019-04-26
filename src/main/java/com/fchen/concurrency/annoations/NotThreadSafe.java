@@ -6,14 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @Classname ThreadSafe
- * @Description 用来标记线程安全的类
+ * @Classname NotThreadSafe
+ * @Description 用来标记线程不安全的类
  * @Date 2019/4/26 11:53
  * @Author by Fchen
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface ThreadSafe {
+public @interface NotThreadSafe {
 
     String value() default "";
 }
