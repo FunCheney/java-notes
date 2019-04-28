@@ -1,4 +1,4 @@
-package com.fchen.concurrency;
+package com.fchen.concurrency.example;
 
 import com.fchen.concurrency.annoations.NotThreadSafe;
 import lombok.extern.slf4j.Slf4j;
