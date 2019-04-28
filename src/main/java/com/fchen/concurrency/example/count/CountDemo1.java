@@ -1,4 +1,4 @@
-package com.fchen.concurrency.example;
+package com.fchen.concurrency.example.count;
 
 import com.fchen.concurrency.annoations.NotThreadSafe;
 import lombok.extern.slf4j.Slf4j;
@@ -9,14 +9,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 /**
- * @Classname ConcurrencyTest
+ * @Classname CountDemo1
  * @Description TODO
  * @Date 2019/4/28 12:49
  * @Author by Fchen
  */
 @Slf4j
 @NotThreadSafe
-public class ConcurrencyTest {
+public class CountDemo1 {
     //请求总数
     public static int clientTotal = 5000;
 
