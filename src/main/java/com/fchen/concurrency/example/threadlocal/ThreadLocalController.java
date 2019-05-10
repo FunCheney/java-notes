@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @Classname ThreadLocalController
- * @Description TODO
+ * @Description ThreadLocal测试类
  * @Date 2019/5/9 19:34
  * @Author by Fchen
  */

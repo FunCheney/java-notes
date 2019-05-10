@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Classname HttpInterceptor
- * @Description TODO
+ * @Description http请求拦截器
  * @Date 2019/5/9 19:26
  * @Author by Fchen
  */
