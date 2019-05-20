@@ -4,7 +4,7 @@
 
 线程间状态转换：
 
-![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/ThreadState1.png "Thread Status")
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/2.png "Thread Status")
 * 1.new 新建状态，线程被创建但未启动。创建线程的方式有以下几种：
     1. 继承Thread类
     2. 实现Runnable接口
