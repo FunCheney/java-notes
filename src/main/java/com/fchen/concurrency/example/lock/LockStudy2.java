@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * @Classname LockStudy1
+ * @Classname LockStudy2
  * @Description lock
  * @Date 2019/4/28 12:49
  * @Author by Fchen
@@ -38,11 +38,21 @@ public class LockStudy2 {
 
     }
     public Set<String> getAllKeys(){
-
+        readLock.lock();
+        try{
+            return map.keySet();
+        }finally {
+            readLock.unlock();
+        }
     }
 
     public Data put(String key, Data value){
-
+        writeLock.lock();
+        try{
+            return map.put(key,value);
+        }finally {
+            writeLock.unlock();
+        }
     }
     class Data{
 
