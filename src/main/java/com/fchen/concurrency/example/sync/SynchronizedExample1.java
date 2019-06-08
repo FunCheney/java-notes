@@ -33,8 +33,14 @@ public class SynchronizedExample1 {
      *   原因: synchronized 不是方法申明的一部分 ，子类想使用synchronized 要显示的申明
      */
     public synchronized void test2(int j){
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         for(int i = 0; i < 10; i++){
             log.info("test2 {} - {}",j,i);
+
         }
     }
 
