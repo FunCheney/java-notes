@@ -42,4 +42,8 @@ public class Singleton5 {
         }
         return instance;
     }
+
+    public static void main(String[] args) {
+        Singleton5.getInstance();
+    }
 }
