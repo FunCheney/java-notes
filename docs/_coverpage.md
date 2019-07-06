@@ -5,6 +5,4 @@
 
 
 
-[GitHub](https://github.com/FunCheney/concurrency)
-
-[Get Started](https://github.com/FunCheney/concurrency/blob/master/README.md)
+[GitHub](https://github.com/FunCheney)
