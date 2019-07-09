@@ -1,10 +1,10 @@
-## concurrency
-### :lock:  1. 概要
+# concurrency
+## :lock:  1. 概要
 #### :key: 并发是什么
 #### :key: 多线程能干什么
 #### :key: 为什么要学习并发与多线程
 
-### :interrobang:  2. 并发与多线程带来的问题
+## :interrobang:  2. 并发与多线程带来的问题
 * 1.线程安全
 
 * 2.活跃性问题
@@ -18,7 +18,7 @@
         c. 等待的线程永远不被唤醒
     3. 活锁
 * 3.性能问题
-### :computer:  3. 如何学习
+## :computer:  3. 如何学习
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/abstract_01.jpg "abstract")
 
 
