@@ -40,12 +40,25 @@
 ## :computer:  3. 如何学习
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/abstract_01.jpg "abstract")
 
-## :eyeglasses:  4. 基础知识
+## :eyeglasses:  4. 抽象的概念
 #### :bookmark_tabs:  计算机内存模型
-#### :bookmark_tabs:  Java内存模型
+* 缓存一致性问题
+* 乱序执行优化与问题
 #### :bookmark_tabs:  顺序一致性
 
+#### :bookmark_tabs:  Java内存模型
+* 设计的初衷
+* 解决的问题
+## :eyeglasses:  4. 线程安全
 
+## :eyeglasses:  5. 可见性、有序性、原子性
+#### 5.1 原子性及其实现
+
+#### 5.1 可见性及其实现
+
+#### 5.1 有序性及其实现
+
+#### :eyeglasses:  6. Java并发机制的底层实现
 
 
 
