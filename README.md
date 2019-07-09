@@ -21,7 +21,10 @@
 ## :computer:  3. 如何学习
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/abstract_01.jpg "abstract")
 
-
+## :eyeglasses:  4. 基础知识
+#### :bookmark_tabs:  计算机内存模型
+#### :bookmark_tabs:  Java内存模型
+#### :bookmark_tabs:  顺序一致性
 
 
 
