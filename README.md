@@ -67,6 +67,7 @@
 
 
 ## :link:  高并发处理思路与手段
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/way.jpg "处理方式与手段")
 
 
 
