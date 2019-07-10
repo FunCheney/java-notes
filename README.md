@@ -49,9 +49,9 @@
 #### :bookmark_tabs:  Java内存模型
 * 设计的初衷
 * 解决的问题
-## :eyeglasses:  4. 线程安全
+## :eyes:  4. 线程安全
 
-## :eyeglasses:  5. 可见性、有序性、原子性
+## :pencil2:  5. 可见性、有序性、原子性
 #### :memo: 原子性及其实现
 
 #### :memo: 可见性及其实现
