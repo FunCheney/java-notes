@@ -52,13 +52,21 @@
 ## :eyes:  4. 线程安全
 
 ## :pencil2:  5. 可见性、有序性、原子性
-#### :memo: 原子性及其实现
+#### :memo: 原子性
 
-#### :memo: 可见性及其实现
+#### :memo: 可见性
 
-#### :memo: 有序性及其实现
+#### :memo: 有序性
 
 ## :crossed_swords:  6. Java并发机制的底层实现
+#### :notebook: 原子操作即实现原理
+#### :notebook: synchronized
+#### :notebook: volatile
+#### :notebook: final
+
+
+
+## :link:  高并发处理思路与手段
 
 
 
