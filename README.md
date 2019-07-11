@@ -47,23 +47,42 @@
 #### :bookmark_tabs:  Java内存模型
 * 设计的初衷
 * 解决的问题
-## :eyes:  5. 线程安全
+
+## :crossed_swords:  5. Java并发机制的底层实现
+#### :notebook: 原子操作即实现原理
+#### :notebook: synchronized
+#### :notebook: volatile
+
+
+## :eyes:  6. 线程安全
 #### :memo: 何为线程安全
 #### :memo: Java中操作共享数据安全程度
 #### :memo: 如何保证线程安全
+#####  互斥同步
+&ensp;&esnp;互斥同步是常见的一种并发正确的手段。**同步**是指在多个线程并发访问共享数据时，保证共享数据
+在同一时刻只被一个线程使用。
 
-## :pencil2:  6. 可见性、有序性、原子性
+&ensp;&esnp;互斥是实现同步的一种手段，临界区、互斥量和信号量都是主要的互斥实现方式。
+
+* synchronize 是实现互斥的主要手段。
+
+* ReentrantLocak 实现同步。
+
+##### 非阻塞同步
+
+&ensp;&esnp;
+
+##### 无同步方案
+
+## :pencil2:  7. 可见性、有序性、原子性
 #### :memo: 原子性
 
 #### :memo: 可见性
 
 #### :memo: 有序性
 
-## :crossed_swords:  7. Java并发机制的底层实现
-#### :notebook: 原子操作即实现原理
-#### :notebook: synchronized
-#### :notebook: volatile
 #### :notebook: final
+
 
 
 
