@@ -47,16 +47,19 @@
 #### :bookmark_tabs:  Java内存模型
 * 设计的初衷
 * 解决的问题
-## :eyes:  4. 线程安全
+## :eyes:  5. 线程安全
+#### :memo: 何为线程安全
+#### :memo: Java中操作共享数据安全程度
+#### :memo: 如何保证线程安全
 
-## :pencil2:  5. 可见性、有序性、原子性
+## :pencil2:  6. 可见性、有序性、原子性
 #### :memo: 原子性
 
 #### :memo: 可见性
 
 #### :memo: 有序性
 
-## :crossed_swords:  6. Java并发机制的底层实现
+## :crossed_swords:  7. Java并发机制的底层实现
 #### :notebook: 原子操作即实现原理
 #### :notebook: synchronized
 #### :notebook: volatile
