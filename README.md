@@ -76,9 +76,9 @@
 
 &ensp;&ensp;互斥是实现同步的一种手段，临界区、互斥量和信号量都是主要的互斥实现方式。
 
-* synchronize 是实现互斥的主要手段。
+   1）. synchronize 是实现互斥的主要手段。
 
-* ReentrantLocak 实现同步。
+   2）. ReentrantLocak 实现同步。
 
 * 2.非阻塞同步
 
