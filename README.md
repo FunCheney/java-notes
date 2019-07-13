@@ -1,5 +1,5 @@
 # concurrency
-## :lock:  1. 概要
+## :mag_right:  1. 概要
 #### :key: 并发是什么
 &ensp;&ensp;并发是指在某个时间段内，多任务交替处理的能力。
 #### :key: 多线程能干什么
@@ -103,15 +103,16 @@
 
 #### :memo: 有序性
 
-## 9.锁
+## :open_book: 9.多线程的一些知识总结
+#### :notebook: final
 #### :notebook: 单例模式与多线程
 * 1.多线程下的单例模式_01
-* 1.多线程下的单例模式_02
-#### :notebook: final
+* 2.多线程下的单例模式_02
 
-## 9.锁
 
-## 10.J.U.C
+## :lock: 10.锁
+
+## :hammer_and_wrench: 11.J.U.C
 
 
 
@@ -124,10 +125,10 @@
  
  
  
- * [volatile关键字_01]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN19sM0xlSnpUS1AxTmJZaXROV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQYm1mNU5yQzdIcm1mVDg1SFpTSXdPa0RucHNVZWM2dGNUTEhpeTIxcWtUVkNfUy1GbnNjcU53Z2xFQXJtcDZVZlpOSXdBb1VhNHFFZW4ybkNydll1R1hINlZvaEdnTjZuWXFCcWlXYlBnTUZBfn4%3D&chksm=7d702c334a07a5253892024e466362908aa8ed4f66fffeb652e5c78d35ea813ba4a102667213#rd
- * [volatile关键字_02]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN18vMWhHMkh0TThmRHhCSW9YV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQYVpfWXRhT21pV0dnanBqM1J1azY5Ykhfb1lCVzdaZDVWVkdiTTFQcUJqdVdRTkFrLTAzcVpnUmhTUmRLYXVTVm02bS1LWVZieGtDdVdpUnpFQ3AxQUczeDNfSVV6aHZHSndubTgxWS1CQzNRfn4%3D&chksm=7d702fc84a07a6de13caafa0cc11c719ef6288dd30dfdd9d9e61ae2e95575c11086f6a5c758b#rd
- * [synchronized关键字_01]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN19BbU5vcnMwTTlXaXJCSG10V2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQWmkyWXEyRU9KT3lnaTJRb2JLbmFEZDVQcWdYeklIZmo0bDB6OVJhYXVMNGd3Q3VEN0FZdXVfaXItN3JpYmZtR3UzTmZrY1RHZHVnanNQWDdDZDRQMDFHVVZjRnBJeVNUNGpJZmFQS0Y4T3lRfn4%3D&chksm=7d702cde4a07a5c8ee52cc76667e0e498edcf1c4c538c6c13586a01efe5a1568f432aa38313f#rd
- * [synchronized关键字_02]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN184azdHNHNTbzRWZENJNDNkV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQWjN2SlltLUJOS0FEajE2dEloMEtBWW5nXzNPdnJnV0FVNjFqazdiUEZpRTBKZUlzalE5WkJqYlpDVzlxc21OOU1iZF9QaXZGZTBtQ1RfYXRUZUg3ekNnbE93Y0lIejltZkNIQXVYOUFhbk9Rfn4%3D&chksm=7d702c2e4a07a538b8c75948f900b71cc99c5a47214b4a61b574c850f75b5aa4ff579c1e18bc#rd
- * [synchronized关键字_03]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN19xOURVU0N3UHg0VDZDcjFPV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQYkc0LXFZOFRLUGV2Q3hfZ3V5Y3phVW9ieEt0cU5LVUQ0bjNfSHRUMWpna3ltTFZmajgwUW55V01KVUFsc3g2Z09xblRlT3FnYjZXcU1mdF9qOUJ0cWhPS18wMjRwV0pqd3dyeG9ZcU5sbTRRfn4%3D&chksm=7d702c2a4a07a53c42d54d34f0e1a54f06c197666cee816ab36a08388cff86a7ac7af5c7a47c#rd
+ [volatile关键字_01]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN19sM0xlSnpUS1AxTmJZaXROV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQYm1mNU5yQzdIcm1mVDg1SFpTSXdPa0RucHNVZWM2dGNUTEhpeTIxcWtUVkNfUy1GbnNjcU53Z2xFQXJtcDZVZlpOSXdBb1VhNHFFZW4ybkNydll1R1hINlZvaEdnTjZuWXFCcWlXYlBnTUZBfn4%3D&chksm=7d702c334a07a5253892024e466362908aa8ed4f66fffeb652e5c78d35ea813ba4a102667213#rd
+ [volatile关键字_02]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN18vMWhHMkh0TThmRHhCSW9YV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQYVpfWXRhT21pV0dnanBqM1J1azY5Ykhfb1lCVzdaZDVWVkdiTTFQcUJqdVdRTkFrLTAzcVpnUmhTUmRLYXVTVm02bS1LWVZieGtDdVdpUnpFQ3AxQUczeDNfSVV6aHZHSndubTgxWS1CQzNRfn4%3D&chksm=7d702fc84a07a6de13caafa0cc11c719ef6288dd30dfdd9d9e61ae2e95575c11086f6a5c758b#rd
+ [synchronized关键字_01]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN19BbU5vcnMwTTlXaXJCSG10V2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQWmkyWXEyRU9KT3lnaTJRb2JLbmFEZDVQcWdYeklIZmo0bDB6OVJhYXVMNGd3Q3VEN0FZdXVfaXItN3JpYmZtR3UzTmZrY1RHZHVnanNQWDdDZDRQMDFHVVZjRnBJeVNUNGpJZmFQS0Y4T3lRfn4%3D&chksm=7d702cde4a07a5c8ee52cc76667e0e498edcf1c4c538c6c13586a01efe5a1568f432aa38313f#rd
+ [synchronized关键字_02]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN184azdHNHNTbzRWZENJNDNkV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQWjN2SlltLUJOS0FEajE2dEloMEtBWW5nXzNPdnJnV0FVNjFqazdiUEZpRTBKZUlzalE5WkJqYlpDVzlxc21OOU1iZF9QaXZGZTBtQ1RfYXRUZUg3ekNnbE93Y0lIejltZkNIQXVYOUFhbk9Rfn4%3D&chksm=7d702c2e4a07a538b8c75948f900b71cc99c5a47214b4a61b574c850f75b5aa4ff579c1e18bc#rd
+ [synchronized关键字_03]:https://mp.weixin.qq.com/s?__biz=MzU3ODY5ODQwMw==&tempkey=MTAxN19xOURVU0N3UHg0VDZDcjFPV2xPVnFJamtOVmlLTER3bENIb0xOQUFXNEJrVF9PYVpLTnFvY05nR2VQYkc0LXFZOFRLUGV2Q3hfZ3V5Y3phVW9ieEt0cU5LVUQ0bjNfSHRUMWpna3ltTFZmajgwUW55V01KVUFsc3g2Z09xblRlT3FnYjZXcU1mdF9qOUJ0cWhPS18wMjRwV0pqd3dyeG9ZcU5sbTRRfn4%3D&chksm=7d702c2a4a07a53c42d54d34f0e1a54f06c197666cee816ab36a08388cff86a7ac7af5c7a47c#rd
 
  
