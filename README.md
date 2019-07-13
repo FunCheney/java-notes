@@ -103,9 +103,9 @@
 
 #### :memo: 有序性
 
-## :open_book: 9.多线程的一些知识总结
-#### :notebook: final
-#### :notebook: 单例模式与多线程
+##  :notebook: 9.多线程的一些知识总结
+####  :open_book: final
+#### :open_book: 单例模式与多线程
 * 1.多线程下的单例模式_01
 * 2.多线程下的单例模式_02
 
