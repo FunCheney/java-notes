@@ -50,6 +50,8 @@
 * 1.设计的初衷
 * 2.解决的问题
 
+ :link: [Java内存模型]
+
 ## :crossed_swords:  5. Java并发机制的底层实现
 #### :notebook: volatile
 * [volatile关键字_01]
@@ -111,8 +113,8 @@
 ##  :notebook: 9.多线程的一些知识总结
 ####  :open_book: final
 #### :open_book: 单例模式与多线程
-* 1.多线程下的单例模式_01
-* 2.多线程下的单例模式_02
+* 1.[多线程下的单例模式_01]
+* 2.[多线程下的单例模式_02]
 
 
 ## :lock: 10.锁
@@ -136,4 +138,5 @@
  [synchronized关键字_02]:https://mp.weixin.qq.com/s/mSCnIgpQJM7dRh5Tm75dUQ
  [synchronized关键字_03]:https://mp.weixin.qq.com/s/oqhlqJEc1dQWY8yVqeGfEQ
  [计算机内存模型]:https://mp.weixin.qq.com/s/_IyRKfNrZAjNhgFFgl2F6A
- 
+ [Java内存模型]:https://mp.weixin.qq.com/s/et8fuuCSDZ19nYlssqWqEQ
+ [多线程下的单例模式_01]:https://mp.weixin.qq.com/s/57B7I7zjruOPN_8YVUP4LA
