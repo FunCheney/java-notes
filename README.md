@@ -74,8 +74,8 @@
 
 * 2.创建线程
 * 3.线程的状态及状态之间转换
-* 4.线程间通信
-* 4.线程池
+* 4.[线程间通信]
+* 5.线程池
 
 ## :eyes:  7. 线程安全
 #### :memo: 何为线程安全
@@ -151,3 +151,4 @@
  [计算机内存模型]:https://mp.weixin.qq.com/s/_IyRKfNrZAjNhgFFgl2F6A
  [Java内存模型]:https://mp.weixin.qq.com/s/et8fuuCSDZ19nYlssqWqEQ
  [多线程下的单例模式_01]:https://mp.weixin.qq.com/s/57B7I7zjruOPN_8YVUP4LA
+ [线程间通信]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/example/waitnotify/wait_notify.md
