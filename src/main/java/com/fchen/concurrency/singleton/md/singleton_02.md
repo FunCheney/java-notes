@@ -1,116 +1,65 @@
-~~### 多线程与单例
-&ensp;&ensp;最近这一段时间在学习多线程，我们知道在使用多线程的时候我们要考虑线程安全的问题。而单例模式要求我们创建全局的一个对象，那么当单例模式遇到多线程时会发生什么样的化学反应呢？我们应该怎样做才能使得单例模式遇到多线程时的使用是安全的、正确的呢？下面我们就来一探究竟。。。*（今天我们来模拟一个面试场景，由浅入深来看看单例与多线程）*
+### 多线程与单例
 
-&ensp;&ensp;之前的文章里面也有写过单例模式的学习。其中有些知识点的理解也不是很到位，随着更加深入的学习，对以前不理解的地方慢慢的也就明白是怎么回事了。对以前觉得自己理解了的知识点，也可能有了一些新的认识。反正学习的过程就是循环往复的，不断的理解、修正、归纳总结的过程。只是希望有所成长，我们都有理由成为更好的自己...闲言少叙，一起再来看看多线程与单例。
+#### 前言 
+上一周的文章中，从如何正确的书写一个单例模式开始(先不要去管性能，线程安全等一系列问题)，然后学习了每一种书写方式有什么样的优点与弊端，最后学习到--
+双重检查锁定(Double-Checked Locking)这一种写法的代码，提到这种方式也是非线程安全的，下面就以这种方式为什么不是线程安全的方式开始今天的学习。
 
-**我一直在想，当有人问我单例模式的时候，他到底是想要问什么？我要怎么回答，才会更加有条理，使得相关知识的脉络更加清晰呢？经过这一段时间的学习，我想他可能是想知道你对如下知识点的理解：**
-
-#### 如何书写一个正确的单例模式
-&ensp;&ensp;九层之台，起于垒土。首先，我们要保证我们写的东西是正确的，这是最基本的先决条件。因为只有这样，你后续的努力才会有意义。以并发与单例为例，如果单例模式都书写不正确，那么，我们怎么保证后续的分析是正确的呢。因此我们先来看看如何书写一个正确的单例：
-
-思路:
-
-&ensp;&ensp;单例模式是指仅仅被实例化一次的类。创建方式，大体上的思路就是把构造器保持为私有的，并导出公有有的静态成员，以便允许客户端能够访问唯一的实例。
-
-代码如下：
+#### 1 双重检查锁定(Double-Checked Locking)
+首先简要代码回顾，以及抛出问题点：
 ```
-public class Singleton {
-    
-    public static final Singleton INSTANCE = new Singleton();
-    
-    private Singleton(){}
-}
-    
-```
-回头看看：
-
-&ensp;&ensp;私有的构器只被调用一次，用来实例化公有的静态的final修饰的Singleton对象，由于构造器私有，所以保证了Singleton对象的唯一性。
-
-&ensp;&ensp;缺点的话，就是如果调用方通过反射的方式通过私有的构造器时可以创建新的对象的，这样一来，就破坏了单例。我们可以在构造方法中加以判断制止这种情况的发生。
-```
-public class Singleton {
-    
-   public static final Singleton INSTANCE = new Singleton();
-
-    private Singleton(){
-        if (INSTANCE != null) {
-            throw new IllegalStateException("Already initialized.");
+    //双重检测机制
+    if(instance == null){
+        //同步锁
+        synchronized (Singleton.class){
+            if(instance == null){
+                instance = new Singleton();
+            }
         }
     }
-}
+```
+&ensp;&ensp;上述所截取的代码部分，是通过对instance==null的双重判断来降低上一篇文章中提到synchronized带来的性能开销。如果第一次instance不为null(即：对象已经创建好)就直接返回，不需要进行后续的加锁，初始化对象的操作。通过synchronized来保证同一时刻只有一个线程创建对象。
+
+&ensp;&ensp;但是，上述代代码在多线程的情况下任然是有问题的，可能出现的问题是当某一个线程第一次判断**instance == null**为flase 时，instance引用的对象还未被初始化完成。
+
+##### 问题的根源
+&ensp;&ensp;上述问题是由，编译器，处理器对字节码指令的重排序(优化)带来的。上述截取的代码中的(instance = new Singleton();)可以分为如下的伪代码：
+```
+memory = allocate()   //1.分配对象的内存空间
+ctorInstance(memory)  //2.初始化对象
+instance = memory     //3.设置instance指向刚分配的内存
+```
+&ensp;&ensp;JVM和CPU发生了指令重排(在单线程内，允许不会对程序执行结果有影响的重排序)，也就是上面伪代码，重排序后的执行顺序可能会下：
+```
+memory = allocate() //1. 分配对象的内存空间
+instance = memory   //3.设置instance指向刚分配的内存
+ctoInstance()       //2.初始化对象
+```
+&ensp;&ensp;这种重排序在单线程的情况下不会对单线程的执行结果产生什么影响，但是在多线程的情况下就会出问题，我们结合刚开始截取的**双重检查锁定(Double-Checked Locking)**代码为例，来看看多线程情况下会有产生什么结果。
+
+假设所有的线程都是第一次访问：
+
+```
+  1.程A进入到synchronized代码块内，判断instance==null成立；
+  2.线程A执行 instance = new Singleton();
+     由于指令重排的原因，先分配对象的内存空间，
+                       然后设置instance指向分配的内存空间
+                       但是对象还未完成初始化
+  3.此时，线程B来到第个instance==null的地方，由于instance已
+    在步骤2)中指向分配的内存空间，所以instance == null 不成
+    立，直接返回instance引用的对象。
+  4.此时，线程B将会访问到一个还未被初始化的对象。
 ```
 
-&ensp;&ensp;当我们理解了单例模式的书写思路，可以编写正确的代码之后，我们再来看看，是否有其他的实现方式。
+基于上述的分析，这种优化也是存在问题的，并且也知道问题出在什么地方。既然找到了问题，那我们就来解决问题。根据上述问题的根源，有以下两点:
 
-#### 基于静态工厂方法的方式
+* 禁止指令重排序
+* 允许重排序，但不允许其他线程看到这个重排序。
 
-&ensp;&ensp;基于静态工厂的方式创建单例的实现思路与上述的思路一致。只不过是导出的公有域有对象变成了方法，类的成员变量变成私有的静态的final修饰而已。
-```
-public class Singleton {
-    private static final Singleton INSTANCE = new Singleton();
-    
-    private Singleton(){}
-    
-    public static Singleton getInstance(){
-        return INSTANCE;
-    }
-}
-```
-回头看看：
+通过以上两种方式就可以写出线程安全的单例模式了。
 
-&ensp;&ensp;通过使用静态工厂方法的方式，在不改变API的前提下，我们可以改变该类是否应该是单例的想法。工厂方法返回该类的唯一实例。但是他很容易被修改，比如修改成每个调用该方法的线程返回一个唯一的实例。但是也存在通过反射改变单例的风险。
+#### 2 基于volatile的双重检查锁定(Double-Checked Locking)
 
-&ensp;&ensp;上述这两种创建单例的方式是线程安全的(也是我们常说的--饿汉模式)。因为在类初始化时已经创建好了，用的时候拿来就用。但是，这样一来就使得性能可能会差点。(我是不会提懒汉模式的，因为我依稀记得在《Effective Java》中有提到，要慎用延迟初始化的建议，尤其是在并发的场景下会存在线程安全安全的问题，要做好正确的同步。)
-
-&ensp;&ensp;既然有性能问题，那我们要解决啊，不能放之任之啊！于是乎，就有了下面的解决方案：
-
-
-#### 延迟初始化的方式(懒汉模式)
-
-&ensp;&ensp;延迟初始化，类创建的时候对象不进行初始化，知道使用到对象的时候完成初始化。也就是我们经常说的单例模式的懒汉模式。
-```
-public class Singleton {
-    /**
-     * 构造方法私有化
-     */
-    private Singleton() {
-    }
-
-    /**
-     * 单例对象
-     */
-    private static Singleton1 instance = null;
-
-    /**
-     * 静态的工厂方法
-     * @return
-     */
-    public static Singleton getInstance(){
-        if(instance == null){
-            // 1.多线程的情况下 这里可能会被调用两次 拿到两个不同的对象
-            instance = new Singleton();
-        }
-        return instance;
-    }
-}
-```
-回头看看：
-
-&ensp;&ensp;这里也是通过静态工厂的方式初始化，但是该方法存在线程安全问题！毛病出在哪里呢？
-
-答：毛病出在如下图所示的地方：
-
-假设:
-
-    1.线程B运行到如上所示的地方，但还未完成 instance = new Singleton()的操作。
-    2.由于未做任何的同步措施，使得线程A运行到如上图所示的地方。
-    3.由于1中的原因，导致 instance == null 所以线程A也进入到if{}里面。
-    4.这就导致线程A、线程B都会拿到各自初始化的对象，这就违背了单例模式。。。
-
-
-#### 基于synchronized延迟初始化的方式
-
-答：有的。就是通过正确的同步手段，使得上述出现线程安全问题的地方，不要并发的被访问。我们之前的学习也了解到，线程间同步，使用synchronized关键字。
+&ensp;&ensp;使用volatile关键字修饰 instance对象，这样通过volatile禁止上述指令重拍序中的步奏3与步奏2重排序来使得延迟加载的单例模式是线程安全的。代码如下:
 
 ```
 public class Singleton {
@@ -121,55 +70,26 @@ public class Singleton {
     }
 
     /**
-     * 单例对象
+     * 单例对象 volatile 加 双重检测机制 禁止 指令重排
      */
-    private static Singleton instance = null;
+    private volatile static Singleton instance = null;
 
     /**
      * 静态的工厂方法
      * @return
      */
     public static synchronized Singleton getInstance(){
-        if(instance == null){
-            instance = new Singleton();
-        }
-        return instance;
-    }
-}
-```
-回头看看：
-
-&ensp;&ensp;这里通过同步方法的方式来保证线程之间的互斥同步，实现单例模式。但是，同样有引入新的问题。我们是为了提高性能才使用懒加载的方式创建对象。但是，这里为了保证安全，又使得线程阻塞来完成锁的获取与释放。如果频繁的调用getInstance()方法，同样性能也不会好到哪里去。。。
-
-**当有人问：哪就没有两全其美的办法吗？**
-
-答：有的。这种问题怎么能难道我们聪明的程序员前辈们呢。况且，我们要相信：办法总比困难多啊！！！
-
-于是乎，就有了下面的解决方案,我们称之为双重检查锁定(Double-Checked Locking)来降低阻塞同步带来的开销：
-```
-public class Singleton4 {
-    /**
-     * 构造方法私有化
-     */
-    private Singleton4() {
-    }
-
-    /**
-     * 单例对象
-     */
-    private static Singleton4 instance = null;
-
-    /**
-     * 静态的工厂方法
-     * @return
-     */
-    public static synchronized Singleton4 getInstance(){
         //双重检测机制
         if(instance == null){
             //同步锁
-            synchronized (Singleton4.class){
+            synchronized (Singleton.class){
                 if(instance == null){
-                    instance = new Singleton4();
+                    /**
+                     *  1. memory = allocate() 分配对象的内存空间
+                     *  2. 初始化对象
+                     *  3. instance = memory 设置instance指向刚分配的内存
+                     */
+                    instance = new Singleton5();
                 }
             }
         }
@@ -177,6 +97,111 @@ public class Singleton4 {
     }
 }
 ```
-&ensp;&ensp;然而，故事的发展总是跌宕起伏的。与此同时，我也只能抱歉的说一声，这种改进并非线程安全的。我想有人会问，这个改进既然是有问题的，那还拿他出来干什么呢？我想说的是，虽然这种改进方案是失败的。但是，其失败的原因还是值得我们去研究一下的，毕竟我们之前学了那么久，关于计算机处理器、Java内存模型的知识。我们可以使用前面的知识来分析这种优化的问题究竟是出在什么地方的。~~
+其中对于volatile 的详细说明请看前面的文章，以及happens-before原则。
+
+#### 2 基于类初始化的解决方案
+
+&ensp;&ensp;初始化一个类，包括执行这个类的静态初始化和初始化在这个类中声明的静态字段。更具Java语言规范，在首次发生下面任意一种状况时，一个类或接口类型T将被立即初始化。
+
+1. T是一个类，而且一个T类型的实例被创建。
+2. T是一个类，且T中声明的静态方法被调用。
+3. T中声明的一个静态字段被赋值。
+4. T中声明的一个静态字段被使用，而且这个字段不是一个常量字段。
+5. T是一个顶级类，而且一个断言语句嵌套在T内部被执行。
+
+
+##### 基于类初始化的单例模式
+
+代码:
+```
+public class InstanceFactory(){
+    private static class InstanceHolder{
+        public static Instance instace = new Instance();
+    }
+    
+    public static Instance getInstance(){
+        return InstanceHolder.getInstance();
+    }
+}
+```
+&ensp;&ensp;在上述代码中，首次执行getInstance()方法时将导致InstanceHolder初始化。JVM在类初始化的加载阶段(Class被加载之后，且被线程使用之前)，会执行类的初始化。在执行类的初始化期间，JVM会获取一个锁，这个锁可以同步多个线程对一个类的初始化。
+
+&ensp;&ensp;这个方案就是：上面描述的允许重排序，但是不允许其他线程看到这个重排序的解决方安。(对于JVM是如何完成类的加载，以及初始化的,后面再详细的学习)。
+
+&ensp;&ensp;在使用静态内部类的时候要注意一点，使用上述的方法可以得到线程安全的单例模式，但是如果遇到序列化对象时，使用默认的方式得到的还是多例。这个适用于我们之前书写的所有的单例模式，只要我们定义的单例加上了** “implements Serializable” **字样，它不在是一个单例。任何一个readObject()方法都会返回一个新建实例，这个新建实例不同于该类初始化时创建实例。
+
+&ensp;&ensp;如果创建的实例实现了序列化接口，为了保证单例，要在所写的单例模式中提供如下的方法：
+```
+private Object readResolve(){
+    return InstanceHolder.getInstance();
+}
+```
+&ensp;&ensp;这个方法忽略了被反序列化的对象，是返回该类在初始化时创建的那个特殊的实例对象。对于一个正在被反序列化的对象，如果它的类定义了一个readResolve()方法，并且具备正确的声明，那么反序列化之后，新创建的对象上的readResolve()方法就会被调用。然后，该方法返回的对象引用将被返回，取代新创建的对象。
+
+&ensp;&ensp;但是，在《Effective Java》中第77条:**对于实例控制，枚举优先于readResolve。**使用枚举，可以避免反序列化带来的问题，并且枚举的使用是线程安全的。
+
+
+#### 3 基于枚举的单例模式
+```
+public class Singleton7 {
+
+    /**
+     * 私有构造函数
+     */
+    private Singleton7() {
+    }
+    public static Singleton7 getInstance(){
+        return Singleton.INSTANCE.getInstance();
+    }
+    private enum Singleton{
+        INSTANCE;
+
+        private Singleton7 singleton;
+
+        /**
+         *  JVM 保证这个方法绝对只调用一次
+         */
+        Singleton(){
+            singleton = new Singleton7();
+        }
+
+        public Singleton7 getInstance(){
+            return singleton;
+        }
+    }
+}
+```
+&ensp;&ensp;在《Effective Java》中也提到，这种方式是最佳的实现方式。
+
+#### 4 总结
+
+&ensp;&ensp;这两周的文章中，系统的学习的多线程与单例结合的相关知识点，以及，每种单例模式遇到问题时，要如何去思考，去解决。最中的到我们想要的结果。希望以后再用到单例模式时，可以选择对我们来说最为合适的。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
