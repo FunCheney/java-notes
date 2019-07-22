@@ -126,9 +126,12 @@
 
 
 ## :lock: 10.锁
+&ensp;&ensp;在JUC包中Lock是顶层接口。
 
 ####   内部锁
+&ensp;&ensp;利用synchronized实现。
 ####   显示锁
+&ensp;&ensp;利用volatile实现。
 
 ## :hammer_and_wrench: 11.J.U.C
 
@@ -151,5 +154,5 @@
  [计算机内存模型]:https://mp.weixin.qq.com/s/_IyRKfNrZAjNhgFFgl2F6A
  [Java内存模型]:https://mp.weixin.qq.com/s/et8fuuCSDZ19nYlssqWqEQ
  [多线程下的单例模式_01]:https://mp.weixin.qq.com/s/57B7I7zjruOPN_8YVUP4LA
- [多线程下的单例模式_02]:https://mp.weixin.qq.com/
+ [多线程下的单例模式_02]:https://mp.weixin.qq.com/s/UQPR42fAPB3UfNwvto7MuA
  [线程间通信]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/example/waitnotify/wait_notify.md
