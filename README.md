@@ -129,11 +129,14 @@
 &ensp;&ensp;在JUC包中Lock是顶层接口。
 
 ####   内部锁
-&ensp;&ensp;利用synchronized实现。
+&ensp;&ensp;利用synchronized实现。使用synchronized关键字将会隐式的获取锁，但是它将锁的获取与释放固化了，也就是先获取的再释放。这种方式虽然简化了同步管理，但是可扩展性相较于显示的获取锁变差了。
 ####   显示锁
-&ensp;&ensp;利用volatile实现。
+&ensp;&ensp;利用volatile实现。定义了一个volatile int state变量作为共享资源。如果线程获取资源失败，则进入同步FIFO队列中等待。如果获取成功，就执行临界区域代码。执行完释放资源时，会通知同步队列中的等待线程来获取资源后出队并执行。
 
-* AQS
+#### AQS(队列同步容器)
+&ensp;&ensp;队列同步容器AbstractQueuedSynchronizer，是用来构建锁或者其他同步组件的基础框架。
+
+JUC中AQS相关源码阅读
 
 ## :hammer_and_wrench: 11.J.U.C
 
