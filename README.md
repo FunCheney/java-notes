@@ -134,11 +134,16 @@
 &ensp;&ensp;利用volatile实现。定义了一个volatile int state变量作为共享资源。如果线程获取资源失败，则进入同步FIFO队列中等待。如果获取成功，就执行临界区域代码。执行完释放资源时，会通知同步队列中的等待线程来获取资源后出队并执行。
 
 #### AQS(队列同步容器)
-&ensp;&ensp;队列同步容器AbstractQueuedSynchronizer，是用来构建锁或者其他同步组件的基础框架。
+&ensp;&ensp;队列同步容器AbstractQueuedSynchronizer，是用来构建锁或者其他同步组件的基础框架。它使用了一个int成员的变量表示同步状态，通过内置的FIFO队列来完成资源的获取线程的排队工作。
 
-JUC中AQS相关源码阅读
+&ensp;&ensp;同步容器的主要使用方法是继承，子类通过继承同步容器并实现它的抽象方法来管理同步状态，在抽象方法的实现过程中避免不了要对同步状态进行更改，这时就需要同步容器提供的3个方法(getState()、setState(int newState)和 compareAndSetState(int expect,int update))来进行操作，因为他们能够保证状态的改变时线程安全的。
+
+
 
 ## :hammer_and_wrench: 11.J.U.C
+J.U.C 中源码相关阅读笔记
+
+* AQS
 
 
 
