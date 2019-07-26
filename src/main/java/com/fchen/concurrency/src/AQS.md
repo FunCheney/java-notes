@@ -1,10 +1,8 @@
 ### AbstractQueuedSynchronizer 
 &ensp;&ensp; 我们知道AbstractQueuedSynchronizer是依靠一个volatile修饰的int state 和 一个FIFO的队列来实现的。下面先来看看这个变量与队列。
 ```
-     /**
-     * The synchronization state.
-     */
-    private volatile int state;  // 同步状态
+     // 同步状态
+    private volatile int state;  
 ```
 在AbstractQueuedSynchronizer中维护了一个Node类，用来构造FIFO的队列
 ```
