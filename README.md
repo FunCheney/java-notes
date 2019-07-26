@@ -158,14 +158,13 @@ protected boolean isHeldExclusively() | 当前同步器是否在独占模式下�
 
 **同步器提供的模板方法**：
 
-方法名称 | 描述
+方法名称 | 描  述
  ---|---
  void acquire(int arg) | 独占式获取同步状态，如果当前线程获取同步状态成功，则由该方法返回，否则，将进入同步队列等待，该方法将会调用重写的tryAcquire(int arg)方法。
  void acquireInterruptibly(int arg) | 与acquire(int arg)相同，但是该方法响应中断，当前线程未获取到同步状态而进入到同步队列中，如果当前线程被中断，则该方法会抛出InterruptedException并返回。
  boolean tryAcquireNanos(int arg,long nanos) | 在acquireInterruptibly(int arg)基础上增加超时限制，如果当前线程在超时时间内没有获取到同步状态，那么将会返回false，如果获取到了返回true。
  void acquireShared(int arg) | 共享式的获取同步状态，如果当前线程未获取到同步状态，将会进入同步队列等待，与独占式获取的主要区别是在同一时刻可以有多个线程获取到同步状态。
- void ac
- quireSharedInterruptibly(int arg) | 与acquireShared(int arg)相同，该方法响应中断
+ void acquireSharedInterruptibly(int arg) | 与acquireShared(int arg)相同，该方法响应中断
  boolean tryAcquireSharedNanos(int arg,long nanos) | 在acquireSharedInterruptibly(int args)的基础上加入了超时限制
  boolean release(int arg) | 独占式的释放同步状态，该方法会在释放同步状态之后，将同步队列中的第一个节点包含的线程唤醒
  boolean release(int arg) | 共享式的释放同步状态
