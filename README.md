@@ -128,6 +128,8 @@
 ## :lock: 10.锁
 &ensp;&ensp;在JUC包中Lock是顶层接口。
 
+&ensp;&ensp;[并发编程中锁的分类总结]。
+
 ####   内部锁
 &ensp;&ensp;利用synchronized实现。使用synchronized关键字将会隐式的获取锁，但是它将锁的获取与释放固化了，也就是先获取的再释放。
 这种方式虽然简化了同步管理，但是可扩展性相较于显示的获取锁变差了。
@@ -197,7 +199,7 @@ J.U.C 中源码相关阅读笔记
  
  
  
- 
+ [并发编程中锁的分类总结]:https://mp.weixin.qq.com/s/vYuadfkQJytuPgNees16cQ
  [volatile关键字_01]:https://mp.weixin.qq.com/s/DFdImZ1srF-6OI_8ilRi8A
  [volatile关键字_02]:https://mp.weixin.qq.com/s/Z99y3oUYhqvi7uoaet5tZw
  [synchronized关键字_01]:https://mp.weixin.qq.com/s/6PVCZYnStHbbyLo8tY50zQ
