@@ -186,7 +186,7 @@ protected boolean isHeldExclusively() | 当前同步器是否在独占模式下�
 ## :hammer_and_wrench: 11.J.U.C
 J.U.C 中源码相关阅读笔记
 
-* AQS
+* [AQS]
 
 
 
@@ -197,7 +197,7 @@ J.U.C 中源码相关阅读笔记
 
  
  
- 
+ [AQS]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/AQS.md
  [并发编程中锁的分类总结]:https://mp.weixin.qq.com/s/vYuadfkQJytuPgNees16cQ
  [volatile关键字_01]:https://mp.weixin.qq.com/s/DFdImZ1srF-6OI_8ilRi8A
  [volatile关键字_02]:https://mp.weixin.qq.com/s/Z99y3oUYhqvi7uoaet5tZw

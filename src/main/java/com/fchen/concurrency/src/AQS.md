@@ -114,31 +114,53 @@ protected final boolean compareAndSetState(int expect, int update) {
 ```
 对FIFO队列的维护：
 
-```
-//入队操作
-private Node enq(final Node node) {
-    for (;;) {
-        Node t = tail;
-        if (t == null) { // Must initialize
-            if (compareAndSetHead(new Node()))
-                tail = head;
-        } else {
-            node.prev = t;
-            if (compareAndSetTail(t, node)) {
-                t.next = node;
-                return t;
-            }
-        }
-    }
-}
+&ensp;&ensp;首先在同步容器中定义了一个Head节点和Tail节点，用来标记FIFO队列的头结点和尾节点。其中每个节点Node又包含有它的前驱节点与后继节点。也就是说，在同步容器中的FIFO队列是通过双向链表的方式来构造的。
 
-//设置头结点
+设置FIFO队列的头结点
+```
 private void setHead(Node node) {
     head = node;
     node.thread = null;
     node.prev = null;
 }
 ```
+//FIFO队列中节点的入队操作
+```
+private Node enq(final Node node) {
+    for (;;) {
+        // 节点t标记当前队列的尾节点
+        Node t = tail;
+        if (t == null) {
+            /**
+             * 尾节点为空，说明队列为空,创建一个空节点
+             * 并将其使用CAS的方式设置为头结点
+             */
+            if (compareAndSetHead(new Node()))
+                //设置成功后，将头结点指向尾节点，此时队列FIFO队列不为空
+                tail = head;
+        } else {
+            /**
+             * 尾节点不为空，让当前节点的前驱节点为，当前队列的尾节点
+             * 队列添加节点在队尾
+             */
+            node.prev = t;
+            /**
+             * 使用CAS的方式将新添加的节点设置为尾节点
+             * compareAndSetTail(t, node)只需要传递
+             * 当前队列的尾节点和新加入的节点，
+             */ 
+            if (compareAndSetTail(t, node)) {
+                // 设置成功后 维护节点之间的关系
+                // 原先尾节点的下一结点为当前入队的节点
+                t.next = node;
+                return t;
+            }
+        }
+    }
+}
+```
+&ensp;&ensp;这里的for(;;) 是为了保证当前节点的入队成功。试想：假设当前的同步
+
 同步器中的方法:
 
 ```
