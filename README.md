@@ -186,7 +186,21 @@ protected boolean isHeldExclusively() | 当前同步器是否在独占模式下�
 ## :hammer_and_wrench: 11.J.U.C
 J.U.C 中源码相关阅读笔记
 
+locks包下面
 * [AQS]
+* ReentrantLock
+* ReentrantReadWriteLock
+* LockSupport
+
+atomic包下面
+* AtomicInteger
+* AtomicIntegerFieldUpdater
+* AtomicReference
+
+Queue相关
+
+
+
 
 
 
