@@ -173,14 +173,16 @@ private Node enq(final Node node) {
     
     b. 添加失败，一直for循环知道添加成功为止。
 
+&ensp;&ensp;enq(final Node node)方法将并发添加结点的请求通过CAS变得“串行化了”。
+
 同步器中的方法:
 
+将结点添加到等待队列中：
 ```
-// 构造节点并将其加入等待队列
 private Node addWaiter(Node mode) {
-    // 构造节点
+    // 构造结点
     Node node = new Node(Thread.currentThread(), mode);
-    // Try the fast path of enq; backup to full enq on failure
+    // 快速尝试在尾部添加
     Node pred = tail;
     if (pred != null) {
         node.prev = pred;
@@ -193,19 +195,30 @@ private Node addWaiter(Node mode) {
     return node;
 }
 ```
+&ensp;&ensp;addWaiter(Node mode)方法保证了当前线程添加的节点在，正确的添加在FIFO队列的队尾。
+
+&ensp;&ensp;节点进入同步队列之后，就进入了一个自旋的过程，每个节点(或者说每个线程)，都在自省的观察，当条件满足，并获取到同步状态，就可以从这个自旋的过程中退出，否则依旧保留在这个自旋过程中。
 ```
 final boolean acquireQueued(final Node node, int arg) {
     boolean failed = true;
     try {
         boolean interrupted = false;
         for (;;) {
+            // 获取当前节点的前驱节点
             final Node p = node.predecessor();
+            // 当前驱节点为头结点时，独占的获取同步状态
             if (p == head && tryAcquire(arg)) {
+                // 当前节点设置为头结点
                 setHead(node);
+                // 将前驱节点的下一结点的引用置为null
                 p.next = null; // help GC
                 failed = false;
                 return interrupted;
             }
+            /**
+             * 前驱节点不是头结点
+             * ===================
+             */
             if (shouldParkAfterFailedAcquire(p, node) &&
                 parkAndCheckInterrupt())
                 interrupted = true;
@@ -216,6 +229,11 @@ final boolean acquireQueued(final Node node, int arg) {
     }
 }
 ```
+&ensp;&ensp;为什么只有前驱节点是头结点才获取同步状态？
+
+* 1.头结点是成功获取同步状态的节点，而头结点释放了同步状态之后，将会唤醒其后继节点，后继节点的线程被唤醒之后需要检查自己的前驱节点是不是头结点。
+
+* 2.维护同步队列的FIFO原则。
 
 ```
 private void doAcquireInterruptibly(int arg)
@@ -364,6 +382,86 @@ private boolean doAcquireSharedNanos(int arg, long nanosTimeout)
 }
 ```
 ```
+private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
+    int ws = pred.waitStatus;
+    if (ws == Node.SIGNAL)
+        /*
+         * This node has already set status asking a release
+         * to signal it, so it can safely park.
+         */
+        return true;
+    if (ws > 0) {
+        /*
+         * Predecessor was cancelled. Skip over predecessors and
+         * indicate retry.
+         */
+        do {
+            node.prev = pred = pred.prev;
+        } while (pred.waitStatus > 0);
+        pred.next = node;
+    } else {
+        /*
+         * waitStatus must be 0 or PROPAGATE.  Indicate that we
+         * need a signal, but don't park yet.  Caller will need to
+         * retry to make sure it cannot acquire before parking.
+         */
+        compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
+    }
+    return false;
+}
+```
+```
+private final boolean parkAndCheckInterrupt() {
+    LockSupport.park(this);
+    return Thread.interrupted();
+}
+```
+```
+private void cancelAcquire(Node node) {
+    // Ignore if node doesn't exist
+    if (node == null)
+        return;
+
+    node.thread = null;
+
+    // Skip cancelled predecessors
+    Node pred = node.prev;
+    while (pred.waitStatus > 0)
+        node.prev = pred = pred.prev;
+
+    // predNext is the apparent node to unsplice. CASes below will
+    // fail if not, in which case, we lost race vs another cancel
+    // or signal, so no further action is necessary.
+    Node predNext = pred.next;
+
+    // Can use unconditional write instead of CAS here.
+    // After this atomic step, other Nodes can skip past us.
+    // Before, we are free of interference from other threads.
+    node.waitStatus = Node.CANCELLED;
+
+    // If we are the tail, remove ourselves.
+    if (node == tail && compareAndSetTail(node, pred)) {
+        compareAndSetNext(pred, predNext, null);
+    } else {
+        // If successor needs signal, try to set pred's next-link
+        // so it will get one. Otherwise wake it up to propagate.
+        int ws;
+        if (pred != head &&
+            ((ws = pred.waitStatus) == Node.SIGNAL ||
+             (ws <= 0 && compareAndSetWaitStatus(pred, ws, Node.SIGNAL))) &&
+            pred.thread != null) {
+            Node next = node.next;
+            if (next != null && next.waitStatus <= 0)
+                compareAndSetNext(pred, predNext, next);
+        } else {
+            unparkSuccessor(node);
+        }
+
+        node.next = node; // help GC
+    }
+}
+```
+```
  private void unparkSuccessor(Node node) {
         /*
          * If status is negative (i.e., possibly needing signal) try
@@ -423,6 +521,15 @@ public final void acquire(int arg) {
         selfInterrupt();
 }
 ```
+&ensp;&ensp;上述代码主要完成了同步状态的获取、结点构造、加入同步队列以及在同步队列中自旋等待。
+其主要逻辑是：
+
+* 1.首先调用自定义同步器实现的tryAcquire(arg)方法，该方法保证线程安全的获取同步状态，如果同步状态获取失败，则构造同步节点(独占式Node.EXCLUSIVE,同一时刻只能有一个线程成功获取同步状态)；
+
+* 2.通过addWaiter(Node node)方法将该节点加入到同步队列尾部；
+
+* 3.最后调用acquireQueued(Node node,int arg)方法，使得该节点以“死循环”的方式获取同步状态，如果获取不到则阻塞节点中的线程，而被阻塞线程的唤醒主要依靠前驱节点的出队或阻塞线程被中断来实现。
+
 独占式同步状态获取，对中断敏感
 ```
 public final void acquireInterruptibly(int arg)
@@ -472,6 +579,8 @@ public final boolean release(int arg) {
     return false;
 }
 ```
+&ensp;&ensp;当前线程获取同步状态并执行了相应的逻辑之后，就需要释放同步状态，使得后续的节点能够继续的获得同步状态。通过release(int arg)方法可以释放同步状态，该方法释放了同步状态之后，会唤醒其后继节点(进而使后继节点重新尝试获取同步状态)。
+
 共享式的释放同步状态：
 ```
 public final boolean releaseShared(int arg) {
