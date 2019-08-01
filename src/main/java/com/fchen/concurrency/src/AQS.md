@@ -34,12 +34,14 @@ protected final boolean compareAndSetState(int expect, int update) {
         /** 用来标识等待队列中的节点类型，这里表示是独占的 */
         static final Node EXCLUSIVE = null;
 
-        /** 由于在同步队列中等待的线程等待超时或被中断，
+        /** 
+          * 由于在同步队列中等待的线程等待超时或被中断，
           * 需要从同步队列中取消等待，节点进入该状态将不会变化
           */
         static final int CANCELLED =  1;
         
-        /** 后继节点的状态处于等待状态，而当前节点的线程如果释放了同步状态或被取消，
+        /** 
+         *  后继节点的状态处于等待状态，而当前节点的线程如果释放了同步状态或被取消，
          *  将会通知后继节点，使后继节点的线程得以运行
          */
         static final int SIGNAL = -1;
@@ -217,7 +219,8 @@ final boolean acquireQueued(final Node node, int arg) {
             }
             /**
              * 前驱节点不是头结点
-             * ===================
+             *  检查并更新节点的状态,到shouldParkAfterFailedAcquire()返回ture后
+             *  检查当前线程是否被中断
              */
             if (shouldParkAfterFailedAcquire(p, node) &&
                 parkAndCheckInterrupt())
@@ -235,6 +238,7 @@ final boolean acquireQueued(final Node node, int arg) {
 
 * 2.维护同步队列的FIFO原则。
 
+独占式获取同步状态
 ```
 private void doAcquireInterruptibly(int arg)
                         throws InterruptedException {
@@ -250,7 +254,7 @@ private void doAcquireInterruptibly(int arg)
                 return;
             }
             if (shouldParkAfterFailedAcquire(p, node) &&
-                parkAndCheckInterrupt())
+                                        parkAndCheckInterrupt())
                 throw new InterruptedException();
         }
     } finally {
@@ -259,6 +263,8 @@ private void doAcquireInterruptibly(int arg)
     }
 }
 ```
+
+独占式超时获取同步状态
 ```
 private boolean doAcquireNanos(int arg, long nanosTimeout)
                                 throws InterruptedException {
@@ -292,6 +298,7 @@ private boolean doAcquireNanos(int arg, long nanosTimeout)
 }
 ```
 
+共享式获取同步状态
 ```
 private void doAcquireShared(int arg) {
     final Node node = addWaiter(Node.SHARED);
@@ -320,7 +327,9 @@ private void doAcquireShared(int arg) {
             cancelAcquire(node);
     }
 }
-
+```
+共享是获取同步状态(对中断敏感)
+```
 private void doAcquireSharedInterruptibly(int arg)
                         throws InterruptedException {
     final Node node = addWaiter(Node.SHARED);
@@ -346,7 +355,9 @@ private void doAcquireSharedInterruptibly(int arg)
             cancelAcquire(node);
     }
 }
-
+```
+共享式超时获取同步状态
+```
 private boolean doAcquireSharedNanos(int arg, long nanosTimeout)
                                        throws InterruptedException {
     if (nanosTimeout <= 0L)
@@ -381,29 +392,32 @@ private boolean doAcquireSharedNanos(int arg, long nanosTimeout)
     }
 }
 ```
+获取同步状态失败之后，检查并更新节点的状态。返回值表示当前的线程是否应该阻塞
 ```
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
+    // 前驱节点的状态
     int ws = pred.waitStatus;
     if (ws == Node.SIGNAL)
         /*
-         * This node has already set status asking a release
-         * to signal it, so it can safely park.
+         * 前驱节点的状态是等待状态，在等待其他释放了同步状态的线程唤醒
+         * 返回当前线程为阻塞(true)
          */
         return true;
     if (ws > 0) {
         /*
-         * Predecessor was cancelled. Skip over predecessors and
-         * indicate retry.
+         * ws > 0; 表示前驱节点的状态为已取消，
+         * 通过do{} while()循环的方式，使当前
+         * 节点的前驱节点的状态为非取消状态
          */
         do {
             node.prev = pred = pred.prev;
         } while (pred.waitStatus > 0);
+        // 维护节点(双向链表)之间的关系
         pred.next = node;
     } else {
-        /*
-         * waitStatus must be 0 or PROPAGATE.  Indicate that we
-         * need a signal, but don't park yet.  Caller will need to
-         * retry to make sure it cannot acquire before parking.
+        /**
+         * 前驱节点的状态为初始化状态时，通过CAS的方式，
+         * 将前驱节点的状态设置为等待通知的状态
          */
         compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
     }
@@ -490,7 +504,7 @@ private void cancelAcquire(Node node) {
     }
 
 ```
-
+共享式释放同步状态
 ```
 private void doReleaseShared() {
     for (;;) {
