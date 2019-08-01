@@ -301,15 +301,23 @@ private boolean doAcquireNanos(int arg, long nanosTimeout)
 共享式获取同步状态
 ```
 private void doAcquireShared(int arg) {
+    // 构造节点，并将其加入同步队列中
     final Node node = addWaiter(Node.SHARED);
     boolean failed = true;
     try {
         boolean interrupted = false;
         for (;;) {
+            // 获取当前节点的头结点
             final Node p = node.predecessor();
+            // 判断前驱节点是否为头结点
             if (p == head) {
+                // 前驱节点为头节点，尝试获取共享状态 大于0 表示获取同步状态成功
                 int r = tryAcquireShared(arg);
                 if (r >= 0) {
+                    /**
+                     * 获取同步状态成功后，将当前节点设置为头节点
+                     * 从自旋过程中返回
+                     */
                     setHeadAndPropagate(node, r);
                     p.next = null; // help GC
                     if (interrupted)
@@ -318,6 +326,7 @@ private void doAcquireShared(int arg) {
                     return;
                 }
             }
+            
             if (shouldParkAfterFailedAcquire(p, node) &&
                 parkAndCheckInterrupt())
                 interrupted = true;
@@ -392,7 +401,7 @@ private boolean doAcquireSharedNanos(int arg, long nanosTimeout)
     }
 }
 ```
-获取同步状态失败之后，检查并更新节点的状态。返回值表示当前的线程是否应该阻塞
+获取同步状态失败之后，检查并更新节点的状态。返回值表示当前的线程是否应该阻塞。
 ```
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
     // 前驱节点的状态
@@ -424,6 +433,7 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
     return false;
 }
 ```
+阻塞线程并检查是否被中断
 ```
 private final boolean parkAndCheckInterrupt() {
     LockSupport.park(this);
@@ -478,21 +488,11 @@ private void cancelAcquire(Node node) {
 唤醒后继结点
 ```
  private void unparkSuccessor(Node node) {
-        /*
-         * If status is negative (i.e., possibly needing signal) try
-         * to clear in anticipation of signalling.  It is OK if this
-         * fails or if status is changed by waiting thread.
-         */
+        
         int ws = node.waitStatus;
         if (ws < 0)
             compareAndSetWaitStatus(node, ws, 0);
 
-        /*
-         * Thread to unpark is held in successor, which is normally
-         * just the next node.  But if cancelled or apparently null,
-         * traverse backwards from tail to find the actual
-         * non-cancelled successor.
-         */
         Node s = node.next;
         if (s == null || s.waitStatus > 0) {
             s = null;
@@ -572,6 +572,9 @@ public final void acquireShared(int arg) {
         doAcquireShared(arg);
 }
 ```
+&ensp;&ensp;同步器调用tryAcquireShared(arg)方法尝试获取同步状态，该方法返回int类型的值，当这个值大于0时则表示获取到同步状态。
+在共享式获取的自旋过程中，成功获取到同步状态并退出自旋的条件是tryAcquireShared(arg)返回值大于0。
+
 共享式的获取同步状态响应中断,如果被中断则中止：
 ```
  public final void acquireSharedInterruptibly(int arg)

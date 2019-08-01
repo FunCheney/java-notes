@@ -12,7 +12,7 @@ import java.util.concurrent.locks.Lock;
  * @Author by Chen
  */
 public class Mutex implements Lock{
-    private static class sync extends AbstractQueuedSynchronizer{
+    private static class Sync extends AbstractQueuedSynchronizer{
         @Override
         protected boolean tryAcquire(int arg) {
             assert arg  == 1;
@@ -41,32 +41,36 @@ public class Mutex implements Lock{
             return new ConditionObject();
         }
     }
+
+
+    private final Sync sync = new Sync();
     @Override
     public void lock() {
+        sync.acquire(1);
     }
 
     @Override
     public void lockInterruptibly() throws InterruptedException {
-
+        sync.acquireInterruptibly(1);
     }
 
     @Override
     public boolean tryLock() {
-        return false;
+        return sync.tryAcquire(1);
     }
 
     @Override
     public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-        return false;
+        return sync.tryAcquireNanos(1,unit.toNanos(time));
     }
 
     @Override
     public void unlock() {
-
+        sync.release(1);
     }
 
     @Override
     public Condition newCondition() {
-        return null;
+        return sync.newCondition();
     }
 }
