@@ -15,22 +15,34 @@ public class Mutex implements Lock{
     private static class sync extends AbstractQueuedSynchronizer{
         @Override
         protected boolean tryAcquire(int arg) {
-            return super.tryAcquire(arg);
+            assert arg  == 1;
+            if(compareAndSetState(0,1)){
+                setExclusiveOwnerThread(Thread.currentThread());
+                return true;
+            }
+            return false;
         }
 
         @Override
         protected boolean tryRelease(int arg) {
-            return super.tryRelease(arg);
+            assert  arg == 1;
+            if (getState() == 0) throw new IllegalMonitorStateException();
+            setExclusiveOwnerThread(null);
+            setState(0);
+            return true;
         }
 
         @Override
         protected boolean isHeldExclusively() {
             return getState() == 1;
         }
+
+        Condition newCondition(){
+            return new ConditionObject();
+        }
     }
     @Override
     public void lock() {
-
     }
 
     @Override

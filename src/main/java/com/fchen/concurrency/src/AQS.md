@@ -475,6 +475,7 @@ private void cancelAcquire(Node node) {
     }
 }
 ```
+唤醒后继结点
 ```
  private void unparkSuccessor(Node node) {
         /*
@@ -571,7 +572,7 @@ public final void acquireShared(int arg) {
         doAcquireShared(arg);
 }
 ```
-共享式的获取同步状态响应中断：
+共享式的获取同步状态响应中断,如果被中断则中止：
 ```
  public final void acquireSharedInterruptibly(int arg)
         throws InterruptedException {
@@ -644,3 +645,5 @@ public final boolean releaseShared(int arg) {
      throw new UnsupportedOperationException();
  }
 ```
+&esnp;&ensp;这些方法在默认情况下是没有实现的，只是抛出了*UnsupportedOperationException*，此外，上述的这五个方法的声明是没有final的
+修饰的，因此可以实现这些方法来完成自定义同步组件的功能。 
