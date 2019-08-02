@@ -238,7 +238,7 @@ final boolean acquireQueued(final Node node, int arg) {
 
 * 2.维护同步队列的FIFO原则。
 
-独占式获取同步状态
+独占式获取同步状态，如果被中断则返回
 ```
 private void doAcquireInterruptibly(int arg)
                         throws InterruptedException {
@@ -265,11 +265,14 @@ private void doAcquireInterruptibly(int arg)
 ```
 
 独占式超时获取同步状态
+
+&ensp;&ensp;超时获取，主要需要计算出nanosTimeout，为了防止过早的通知，nanosTimeout的计算公式为：nanosTimeout = deadline - System.nanoTime(); 其中deadline为刚进如方法，在还未进入自旋获取同步状态时，就已经算好的最终的过期时间；在自旋过程中，当前节点若不是头结点且没有获取到到同步装态时，通过上述nanosTimeout = deadline - System.nanoTime();来确定是否到超时时间，若大于0则表示未到超时时间，继续后面的判断逻辑；反之表示应经超时。
 ```
 private boolean doAcquireNanos(int arg, long nanosTimeout)
                                 throws InterruptedException {
     if (nanosTimeout <= 0L)
         return false;
+    
     final long deadline = System.nanoTime() + nanosTimeout;
     final Node node = addWaiter(Node.EXCLUSIVE);
     boolean failed = true;
@@ -297,6 +300,12 @@ private boolean doAcquireNanos(int arg, long nanosTimeout)
     }
 }
 ```
+&ensp;&ensp;该方法在自旋的过程中，当节点的前驱节点为头结点是尝试获取同步状态，如果获取成功则从该方法返回，这个过程和独占式同步获取的过程类似。但是在同步状态获取失败的处理上有所不同。如果当前线程获取同步状态失败，则判断是否超时，如果没有超时则重新计算超时间隔nanosTimeout，然后使当前线程等待nanosTimeout纳秒(当已到设置的超时时间，该线程会从LockSupport.parkNanos(this, nanosTimeout)方法返回)。
+
+&ensp;&ensp;如果nanosTimeout 小于等于 spinForTimeoutThreshold(1000纳秒)时，将不会使该线程进行超时等待，而是进入快速再选的过程。原因在于非常短的超时等待无法做到十分精确，如果在进行超时等待，相反会让nanosTimeout的超时从整体上表现的反而不精确。因此，在超时非常短的场景下，同步器会进入无条件快速自旋。
+
+
+
 
 共享式获取同步状态
 ```
@@ -337,7 +346,7 @@ private void doAcquireShared(int arg) {
     }
 }
 ```
-共享是获取同步状态(对中断敏感)
+共享式获取同步状态(对中断敏感)
 ```
 private void doAcquireSharedInterruptibly(int arg)
                         throws InterruptedException {
@@ -436,6 +445,7 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
 阻塞线程并检查是否被中断
 ```
 private final boolean parkAndCheckInterrupt() {
+    // 阻塞当前线程
     LockSupport.park(this);
     return Thread.interrupted();
 }
@@ -526,8 +536,8 @@ private void doReleaseShared() {
     }
 }
 ```
-同步器提供的模板方法：
-
+## 同步器提供的模板方法：
+### 同步状态的获取
 独占式同步状态获取，对中断不敏感
 ```
 public final void acquire(int arg) {
@@ -544,6 +554,8 @@ public final void acquire(int arg) {
 * 2.通过addWaiter(Node node)方法将该节点加入到同步队列尾部；
 
 * 3.最后调用acquireQueued(Node node,int arg)方法，使得该节点以“死循环”的方式获取同步状态，如果获取不到则阻塞节点中的线程，而被阻塞线程的唤醒主要依靠前驱节点的出队或阻塞线程被中断来实现。
+
+独占式获取同步状态流程图==================
 
 独占式同步状态获取，对中断敏感
 ```
@@ -565,6 +577,8 @@ public final boolean tryAcquireNanos(int arg, long nanosTimeout)
         doAcquireNanos(arg, nanosTimeout);
 }
 ```
+独占式超时获取同步状态的流程：========
+
 共享式的获取同步状态：
 ```
 public final void acquireShared(int arg) {
@@ -585,6 +599,17 @@ public final void acquireShared(int arg) {
         doAcquireSharedInterruptibly(arg);
 }
 ```
+共享式超时获取同步状态：
+```
+public final boolean tryAcquireSharedNanos(int arg, long nanosTimeout)
+        throws InterruptedException {
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    return tryAcquireShared(arg) >= 0 ||
+        doAcquireSharedNanos(arg, nanosTimeout);
+}
+```
+### 同步状态的释放
 独占式的释放同步状态：
 ```
 public final boolean release(int arg) {
@@ -610,7 +635,7 @@ public final boolean releaseShared(int arg) {
 }
 ```
 
- 同步器中可重写的方法
+ ## 同步器中可重写的方法
  ```
  /**
   * 独占式获取同步状态，实现该方法需要查询当前状态并判断
@@ -648,5 +673,5 @@ public final boolean releaseShared(int arg) {
      throw new UnsupportedOperationException();
  }
 ```
-&esnp;&ensp;这些方法在默认情况下是没有实现的，只是抛出了*UnsupportedOperationException*，此外，上述的这五个方法的声明是没有final的
+&ensp;&ensp;这些方法在默认情况下是没有实现的，只是抛出了*UnsupportedOperationException*，此外，上述的这五个方法的声明是没有final的
 修饰的，因此可以实现这些方法来完成自定义同步组件的功能。 
