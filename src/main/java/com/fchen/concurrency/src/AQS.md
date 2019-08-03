@@ -1,4 +1,4 @@
-### AbstractQueuedSynchronizer 
+## AbstractQueuedSynchronizer 
 &ensp;&ensp; 我们知道AbstractQueuedSynchronizer是依靠一个volatile修饰的int state 和 一个FIFO的队列来实现的。下面先来看看这个变量与队列。
 
 对同步状态的维护：
@@ -26,7 +26,12 @@ protected final boolean compareAndSetState(int expect, int update) {
     return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
 }
 ```
+### 结点类与同步队列
+
 在AbstractQueuedSynchronizer中维护了一个Node类，用来构造FIFO的队列
+
+**结点模型**：
+
 ```
  static final class Node {
         /** 等待队列中的节点类型，默认是共享的 */
@@ -114,6 +119,9 @@ protected final boolean compareAndSetState(int expect, int update) {
         }
     }
 ```
+**同步队列模型**：
+
+
 对FIFO队列的维护：
 
 &ensp;&ensp;首先在同步容器中定义了一个Head节点和Tail节点，用来标记FIFO队列的头结点和尾节点。其中每个节点Node又包含有它的前驱节点与后继节点。也就是说，在同步容器中的FIFO队列是通过双向链表的方式来构造的。
@@ -238,178 +246,12 @@ final boolean acquireQueued(final Node node, int arg) {
 
 * 2.维护同步队列的FIFO原则。
 
-独占式获取同步状态，如果被中断则返回
-```
-private void doAcquireInterruptibly(int arg)
-                        throws InterruptedException {
-    final Node node = addWaiter(Node.EXCLUSIVE);
-    boolean failed = true;
-    try {
-        for (;;) {
-            final Node p = node.predecessor();
-            if (p == head && tryAcquire(arg)) {
-                setHead(node);
-                p.next = null; // help GC
-                failed = false;
-                return;
-            }
-            if (shouldParkAfterFailedAcquire(p, node) &&
-                                        parkAndCheckInterrupt())
-                throw new InterruptedException();
-        }
-    } finally {
-        if (failed)
-            cancelAcquire(node);
-    }
-}
-```
-
-独占式超时获取同步状态
-
-&ensp;&ensp;超时获取，主要需要计算出nanosTimeout，为了防止过早的通知，nanosTimeout的计算公式为：nanosTimeout = deadline - System.nanoTime(); 其中deadline为刚进如方法，在还未进入自旋获取同步状态时，就已经算好的最终的过期时间；在自旋过程中，当前节点若不是头结点且没有获取到到同步装态时，通过上述nanosTimeout = deadline - System.nanoTime();来确定是否到超时时间，若大于0则表示未到超时时间，继续后面的判断逻辑；反之表示应经超时。
-```
-private boolean doAcquireNanos(int arg, long nanosTimeout)
-                                throws InterruptedException {
-    if (nanosTimeout <= 0L)
-        return false;
-    
-    final long deadline = System.nanoTime() + nanosTimeout;
-    final Node node = addWaiter(Node.EXCLUSIVE);
-    boolean failed = true;
-    try {
-        for (;;) {
-            final Node p = node.predecessor();
-            if (p == head && tryAcquire(arg)) {
-                setHead(node);
-                p.next = null; // help GC
-                failed = false;
-                return true;
-            }
-            nanosTimeout = deadline - System.nanoTime();
-            if (nanosTimeout <= 0L)
-                return false;
-            if (shouldParkAfterFailedAcquire(p, node) &&
-                nanosTimeout > spinForTimeoutThreshold)
-                LockSupport.parkNanos(this, nanosTimeout);
-            if (Thread.interrupted())
-                throw new InterruptedException();
-        }
-    } finally {
-        if (failed)
-            cancelAcquire(node);
-    }
-}
-```
-&ensp;&ensp;该方法在自旋的过程中，当节点的前驱节点为头结点是尝试获取同步状态，如果获取成功则从该方法返回，这个过程和独占式同步获取的过程类似。但是在同步状态获取失败的处理上有所不同。如果当前线程获取同步状态失败，则判断是否超时，如果没有超时则重新计算超时间隔nanosTimeout，然后使当前线程等待nanosTimeout纳秒(当已到设置的超时时间，该线程会从LockSupport.parkNanos(this, nanosTimeout)方法返回)。
-
-&ensp;&ensp;如果nanosTimeout 小于等于 spinForTimeoutThreshold(1000纳秒)时，将不会使该线程进行超时等待，而是进入快速再选的过程。原因在于非常短的超时等待无法做到十分精确，如果在进行超时等待，相反会让nanosTimeout的超时从整体上表现的反而不精确。因此，在超时非常短的场景下，同步器会进入无条件快速自旋。
 
 
 
 
-共享式获取同步状态
-```
-private void doAcquireShared(int arg) {
-    // 构造节点，并将其加入同步队列中
-    final Node node = addWaiter(Node.SHARED);
-    boolean failed = true;
-    try {
-        boolean interrupted = false;
-        for (;;) {
-            // 获取当前节点的头结点
-            final Node p = node.predecessor();
-            // 判断前驱节点是否为头结点
-            if (p == head) {
-                // 前驱节点为头节点，尝试获取共享状态 大于0 表示获取同步状态成功
-                int r = tryAcquireShared(arg);
-                if (r >= 0) {
-                    /**
-                     * 获取同步状态成功后，将当前节点设置为头节点
-                     * 从自旋过程中返回
-                     */
-                    setHeadAndPropagate(node, r);
-                    p.next = null; // help GC
-                    if (interrupted)
-                        selfInterrupt();
-                    failed = false;
-                    return;
-                }
-            }
-            
-            if (shouldParkAfterFailedAcquire(p, node) &&
-                parkAndCheckInterrupt())
-                interrupted = true;
-        }
-    } finally {
-        if (failed)
-            cancelAcquire(node);
-    }
-}
-```
-共享式获取同步状态(对中断敏感)
-```
-private void doAcquireSharedInterruptibly(int arg)
-                        throws InterruptedException {
-    final Node node = addWaiter(Node.SHARED);
-    boolean failed = true;
-    try {
-        for (;;) {
-            final Node p = node.predecessor();
-            if (p == head) {
-                int r = tryAcquireShared(arg);
-                if (r >= 0) {
-                    setHeadAndPropagate(node, r);
-                    p.next = null; // help GC
-                    failed = false;
-                    return;
-                }
-            }
-            if (shouldParkAfterFailedAcquire(p, node) &&
-                parkAndCheckInterrupt())
-                throw new InterruptedException();
-        }
-    } finally {
-        if (failed)
-            cancelAcquire(node);
-    }
-}
-```
-共享式超时获取同步状态
-```
-private boolean doAcquireSharedNanos(int arg, long nanosTimeout)
-                                       throws InterruptedException {
-    if (nanosTimeout <= 0L)
-        return false;
-    final long deadline = System.nanoTime() + nanosTimeout;
-    final Node node = addWaiter(Node.SHARED);
-    boolean failed = true;
-    try {
-        for (;;) {
-            final Node p = node.predecessor();
-            if (p == head) {
-                int r = tryAcquireShared(arg);
-                if (r >= 0) {
-                    setHeadAndPropagate(node, r);
-                    p.next = null; // help GC
-                    failed = false;
-                    return true;
-                }
-            }
-            nanosTimeout = deadline - System.nanoTime();
-            if (nanosTimeout <= 0L)
-                return false;
-            if (shouldParkAfterFailedAcquire(p, node) &&
-                nanosTimeout > spinForTimeoutThreshold)
-                LockSupport.parkNanos(this, nanosTimeout);
-            if (Thread.interrupted())
-                throw new InterruptedException();
-        }
-    } finally {
-        if (failed)
-            cancelAcquire(node);
-    }
-}
-```
+****
+
 获取同步状态失败之后，检查并更新节点的状态。返回值表示当前的线程是否应该阻塞。
 ```
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
@@ -515,27 +357,7 @@ private void cancelAcquire(Node node) {
     }
 
 ```
-共享式释放同步状态
-```
-private void doReleaseShared() {
-    for (;;) {
-        Node h = head;
-        if (h != null && h != tail) {
-            int ws = h.waitStatus;
-            if (ws == Node.SIGNAL) {
-                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))
-                    continue;            // loop to recheck cases
-                unparkSuccessor(h);
-            }
-            else if (ws == 0 &&
-                     !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
-                continue;                // loop on failed CAS
-        }
-        if (h == head)                   // loop if head changed
-            break;
-    }
-}
-```
+
 ## 同步器提供的模板方法：
 ### 同步状态的获取
 独占式同步状态获取，对中断不敏感
@@ -569,6 +391,33 @@ public final void acquireInterruptibly(int arg)
         doAcquireInterruptibly(arg);
 }
 ```
+独占式获取同步状态，如果被中断则返回
+```
+private void doAcquireInterruptibly(int arg)
+                        throws InterruptedException {
+    final Node node = addWaiter(Node.EXCLUSIVE);
+    boolean failed = true;
+    try {
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head && tryAcquire(arg)) {
+                setHead(node);
+                p.next = null; // help GC
+                failed = false;
+                return;
+            }
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                                        parkAndCheckInterrupt())
+                throw new InterruptedException();
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+独占式超时获取同步状态
+
 在acquireInterruptibly的基础上增加超时限制
 ```
 public final boolean tryAcquireNanos(int arg, long nanosTimeout)
@@ -579,9 +428,47 @@ public final boolean tryAcquireNanos(int arg, long nanosTimeout)
         doAcquireNanos(arg, nanosTimeout);
 }
 ```
-独占式超时获取同步状态的流程：
-![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/2.png "独占式超时获取同步状态")
+&ensp;&ensp;超时获取，主要需要计算出nanosTimeout，为了防止过早的通知，nanosTimeout的计算公式为：nanosTimeout = deadline - System.nanoTime(); 其中deadline为刚进如方法，在还未进入自旋获取同步状态时，就已经算好的最终的过期时间；在自旋过程中，当前节点若不是头结点且没有获取到到同步装态时，通过上述nanosTimeout = deadline - System.nanoTime();来确定是否到超时时间，若大于0则表示未到超时时间，继续后面的判断逻辑；反之表示应经超时。
+```
+private boolean doAcquireNanos(int arg, long nanosTimeout)
+                                throws InterruptedException {
+    if (nanosTimeout <= 0L)
+        return false;
+    
+    final long deadline = System.nanoTime() + nanosTimeout;
+    final Node node = addWaiter(Node.EXCLUSIVE);
+    boolean failed = true;
+    try {
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head && tryAcquire(arg)) {
+                setHead(node);
+                p.next = null; // help GC
+                failed = false;
+                return true;
+            }
+            nanosTimeout = deadline - System.nanoTime();
+            if (nanosTimeout <= 0L)
+                return false;
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                nanosTimeout > spinForTimeoutThreshold)
+                LockSupport.parkNanos(this, nanosTimeout);
+            if (Thread.interrupted())
+                throw new InterruptedException();
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+&ensp;&ensp;该方法在自旋的过程中，当节点的前驱节点为头结点是尝试获取同步状态，如果获取成功则从该方法返回，这个过程和独占式同步获取的过程类似。但是在同步状态获取失败的处理上有所不同。如果当前线程获取同步状态失败，则判断是否超时，如果没有超时则重新计算超时间隔nanosTimeout，然后使当前线程等待nanosTimeout纳秒(当已到设置的超时时间，该线程会从LockSupport.parkNanos(this, nanosTimeout)方法返回)。
 
+&ensp;&ensp;如果nanosTimeout 小于等于 spinForTimeoutThreshold(1000纳秒)时，将不会使该线程进行超时等待，而是进入快速再选的过程。原因在于非常短的超时等待无法做到十分精确，如果在进行超时等待，相反会让nanosTimeout的超时从整体上表现的反而不精确。因此，在超时非常短的场景下，同步器会进入无条件快速自旋。
+
+独占式超时获取同步状态的流程：
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/2.png "独占式超时获取同步状态")
 
 共享式的获取同步状态：
 ```
@@ -613,6 +500,111 @@ public final boolean tryAcquireSharedNanos(int arg, long nanosTimeout)
         doAcquireSharedNanos(arg, nanosTimeout);
 }
 ```
+共享式获取同步状态
+```
+private void doAcquireShared(int arg) {
+    // 构造节点，并将其加入同步队列中
+    final Node node = addWaiter(Node.SHARED);
+    boolean failed = true;
+    try {
+        boolean interrupted = false;
+        for (;;) {
+            // 获取当前节点的头结点
+            final Node p = node.predecessor();
+            // 判断前驱节点是否为头结点
+            if (p == head) {
+                // 前驱节点为头节点，尝试获取共享状态 大于0 表示获取同步状态成功
+                int r = tryAcquireShared(arg);
+                if (r >= 0) {
+                    /**
+                     * 获取同步状态成功后，将当前节点设置为头节点
+                     * 从自旋过程中返回
+                     */
+                    setHeadAndPropagate(node, r);
+                    p.next = null; // help GC
+                    if (interrupted)
+                        selfInterrupt();
+                    failed = false;
+                    return;
+                }
+            }
+            
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                parkAndCheckInterrupt())
+                interrupted = true;
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+共享式获取同步状态(对中断敏感)
+```
+private void doAcquireSharedInterruptibly(int arg)
+                        throws InterruptedException {
+    final Node node = addWaiter(Node.SHARED);
+    boolean failed = true;
+    try {
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head) {
+                int r = tryAcquireShared(arg);
+                if (r >= 0) {
+                    setHeadAndPropagate(node, r);
+                    p.next = null; // help GC
+                    failed = false;
+                    return;
+                }
+            }
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                parkAndCheckInterrupt())
+                throw new InterruptedException();
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+共享式超时获取同步状态
+```
+private boolean doAcquireSharedNanos(int arg, long nanosTimeout)
+                                       throws InterruptedException {
+    if (nanosTimeout <= 0L)
+        return false;
+    final long deadline = System.nanoTime() + nanosTimeout;
+    final Node node = addWaiter(Node.SHARED);
+    boolean failed = true;
+    try {
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head) {
+                int r = tryAcquireShared(arg);
+                if (r >= 0) {
+                    setHeadAndPropagate(node, r);
+                    p.next = null; // help GC
+                    failed = false;
+                    return true;
+                }
+            }
+            nanosTimeout = deadline - System.nanoTime();
+            if (nanosTimeout <= 0L)
+                return false;
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                nanosTimeout > spinForTimeoutThreshold)
+                LockSupport.parkNanos(this, nanosTimeout);
+            if (Thread.interrupted())
+                throw new InterruptedException();
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+
+
 ### 同步状态的释放
 独占式的释放同步状态：
 ```
@@ -636,6 +628,28 @@ public final boolean releaseShared(int arg) {
         return true;
     }
     return false;
+}
+```
+
+共享式释放同步状态doReleaseShared()方法:
+```
+private void doReleaseShared() {
+    for (;;) {
+        Node h = head;
+        if (h != null && h != tail) {
+            int ws = h.waitStatus;
+            if (ws == Node.SIGNAL) {
+                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))
+                    continue;            // loop to recheck cases
+                unparkSuccessor(h);
+            }
+            else if (ws == 0 &&
+                     !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
+                continue;                // loop on failed CAS
+        }
+        if (h == head)                   // loop if head changed
+            break;
+    }
 }
 ```
 
