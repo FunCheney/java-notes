@@ -31,6 +31,7 @@ protected final boolean compareAndSetState(int expect, int update) {
 在AbstractQueuedSynchronizer中维护了一个Node类，用来构造FIFO的队列
 
 **结点模型**：
+
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/node.png "结点模型")
 
 
@@ -122,8 +123,8 @@ protected final boolean compareAndSetState(int expect, int update) {
     }
 ```
 **同步队列模型**：
-![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/sync.png "同步队列模型")
 
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/sync.png "同步队列模型")
 
 对FIFO队列的维护：
 
