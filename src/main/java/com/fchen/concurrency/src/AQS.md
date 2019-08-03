@@ -296,6 +296,7 @@ private final boolean parkAndCheckInterrupt() {
     return Thread.interrupted();
 }
 ```
+
 ```
 private void cancelAcquire(Node node) {
     // Ignore if node doesn't exist
@@ -304,27 +305,16 @@ private void cancelAcquire(Node node) {
 
     node.thread = null;
 
-    // Skip cancelled predecessors
     Node pred = node.prev;
     while (pred.waitStatus > 0)
         node.prev = pred = pred.prev;
 
-    // predNext is the apparent node to unsplice. CASes below will
-    // fail if not, in which case, we lost race vs another cancel
-    // or signal, so no further action is necessary.
     Node predNext = pred.next;
 
-    // Can use unconditional write instead of CAS here.
-    // After this atomic step, other Nodes can skip past us.
-    // Before, we are free of interference from other threads.
     node.waitStatus = Node.CANCELLED;
 
-    // If we are the tail, remove ourselves.
     if (node == tail && compareAndSetTail(node, pred)) {
-        compareAndSetNext(pred, predNext, null);
     } else {
-        // If successor needs signal, try to set pred's next-link
-        // so it will get one. Otherwise wake it up to propagate.
         int ws;
         if (pred != head &&
             ((ws = pred.waitStatus) == Node.SIGNAL ||
