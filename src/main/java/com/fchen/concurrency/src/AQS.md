@@ -128,7 +128,8 @@ protected final boolean compareAndSetState(int expect, int update) {
 
 对FIFO队列的维护：
 
-&ensp;&ensp;首先在同步容器中定义了一个Head节点和Tail节点，用来标记FIFO队列的头结点和尾节点。其中每个节点Node又包含有它的前驱节点与后继节点。也就是说，在同步容器中的FIFO队列是通过双向链表的方式来构造的。
+&ensp;&ensp;首先在同步容器中定义了一个Head节点和Tail节点，用来标记FIFO队列的头结点和尾节点。其中每个节点Node又包含有它的前驱节点与后继节点。
+也就是说，在同步容器中的FIFO队列是通过双向链表的方式来构造的。
 
 设置FIFO队列的头结点
 ```
@@ -138,6 +139,30 @@ private void setHead(Node node) {
     node.prev = null;
 }
 ```
+&ensp;&ensp;在同步队列中，头结点是获取同步状态成功的结点，头结点的线程在释放同步状态时，将会唤醒后继结点，而后继结点将会在获取同步状态
+成功时将自己设置为头结点。
+
+将结点添加到等待队列中：
+```
+private Node addWaiter(Node mode) {
+    // 构造结点
+    Node node = new Node(Thread.currentThread(), mode);
+    // 快速尝试在尾部添加
+    Node pred = tail;
+    if (pred != null) {
+        node.prev = pred;
+        if (compareAndSetTail(pred, node)) {
+            pred.next = node;
+            return node;
+        }
+    }
+    // 调用入队方法
+    enq(node);
+    return node;
+}
+```
+&ensp;&ensp;addWaiter(Node mode)方法保证了当前线程添加的节点在，正确的添加在FIFO队列的队尾。
+
 FIFO队列中节点的入队操作
 ```
 private Node enq(final Node node) {
@@ -189,31 +214,9 @@ private Node enq(final Node node) {
 
 &ensp;&ensp;enq(final Node node)方法将并发添加结点的请求通过CAS变得“串行化了”。
 
-同步器中的方法:
 
-将结点添加到等待队列中：
-```
-private Node addWaiter(Node mode) {
-    // 构造结点
-    Node node = new Node(Thread.currentThread(), mode);
-    // 快速尝试在尾部添加
-    Node pred = tail;
-    if (pred != null) {
-        node.prev = pred;
-        if (compareAndSetTail(pred, node)) {
-            pred.next = node;
-            return node;
-        }
-    }
-    enq(node);
-    return node;
-}
-```
-&ensp;&ensp;addWaiter(Node mode)方法保证了当前线程添加的节点在，正确的添加在FIFO队列的队尾。
-
-
-****
-
+------
+------
 获取同步状态失败之后，检查并更新节点的状态。返回值表示当前的线程是否应该阻塞。
 ```
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
@@ -293,27 +296,46 @@ private void cancelAcquire(Node node) {
 唤醒后继结点
 ```
  private void unparkSuccessor(Node node) {
-        
+        // 获取结点node的等待状态
         int ws = node.waitStatus;
+        
         if (ws < 0)
+            /** 
+             * 如果结点的状态为非取消状态，将node结点的状态
+             * 通过CAS 的方式设置为初始状态(0)
+             */
             compareAndSetWaitStatus(node, ws, 0);
-
+         
+        // 得到node结点的下一结点   
         Node s = node.next;
+        // 判断s结点是否为空，或者结点的状态是否为已取消
         if (s == null || s.waitStatus > 0) {
             s = null;
             for (Node t = tail; t != null && t != node; t = t.prev)
+                 /**
+                  * 从队列的尾结点开始 向前遍历，
+                  * 当t 为 null 或者 t 为 node 结点时结束循环
+                  * 找到一个状态不是初始状态或已取消状态的结点
+                  */
                 if (t.waitStatus <= 0)
                     s = t;
         }
+        /**
+         * node 结点中的下一结点不为空 且 waitStatus <=0
+         * 或 找到上述for循环结点
+         * 就 阻塞结点s中的线程
+         */
         if (s != null)
             LockSupport.unpark(s.thread);
     }
 
 ```
-***
+-----
+-----
 
 ## 同步器提供的模板方法：
 ### 同步状态的获取
+
 独占式同步状态获取，对中断不敏感
 ```
 public final void acquire(int arg) {
