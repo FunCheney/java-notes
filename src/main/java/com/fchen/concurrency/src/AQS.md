@@ -314,6 +314,7 @@ private void cancelAcquire(Node node) {
     node.waitStatus = Node.CANCELLED;
 
     if (node == tail && compareAndSetTail(node, pred)) {
+        compareAndSetNext(pred, predNext, null);
     } else {
         int ws;
         if (pred != head &&
