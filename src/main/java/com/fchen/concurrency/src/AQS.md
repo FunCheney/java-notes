@@ -555,7 +555,9 @@ public final void acquire(int arg) {
 
 * 3.最后调用acquireQueued(Node node,int arg)方法，使得该节点以“死循环”的方式获取同步状态，如果获取不到则阻塞节点中的线程，而被阻塞线程的唤醒主要依靠前驱节点的出队或阻塞线程被中断来实现。
 
-独占式获取同步状态流程图==================
+独占式获取同步状态流程图
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/1.png "独占式获取同步状态")
+
 
 独占式同步状态获取，对中断敏感
 ```
@@ -577,7 +579,9 @@ public final boolean tryAcquireNanos(int arg, long nanosTimeout)
         doAcquireNanos(arg, nanosTimeout);
 }
 ```
-独占式超时获取同步状态的流程：========
+独占式超时获取同步状态的流程：
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/2.png "独占式超时获取同步状态")
+
 
 共享式的获取同步状态：
 ```
