@@ -180,7 +180,79 @@ protected boolean isHeldExclusively() | 当前同步器是否在独占模式下�
  Collection<Thread> getQueuedThreads() | 获取等待在同步队列上的线程集合
  
  &ensp;&ensp;同步状态提供的模板方法基本分3类：独占式获取与释放同步状态，共享式获取与释放同步状态以及查询同步队列中等待线程的情况。
+ &ensp;&ensp;同步状态提供的模板方法基本分3类：独占式获取与释放同步状态，共享式获取与释放同步状态以及查询同步队列中等待线程的情况。自定义同步组件将使用同步器提供的模板方法来实现自己的同步语义。
+ 
+ &ensp;&ensp;我们使用上面介绍的方法实现一个锁的功能。主要步骤如下：
+ 
+ * 1.将AbstractQueuedSynchronizer的子类定义为非公共的内部帮助器类，用来实现其封闭类的同步属性。
+ * 2.在子类中根据锁的属性(独占/共享)来实现不同的方法，我在这里实现独占锁，因此实现tryAcquire(int arg)，tryRelease(int arg)方法。
+ * 3.实现Lock接口，实现Lock接口中的方法。
+ * 4.锁的实现，交给我们创建的同步容器的子类(Sync)去实现。
+ * 5.最后完成Sync类中的tryAcquire(int arg)，tryRelease(int arg)方法。
+ 
+实现代码如下：
+```
+public class MyLock implements Lock {
 
+    private Sync sync = new Sync();
+
+    @Override
+    public void lock() {
+        sync.acquire(1);
+    }
+
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
+        sync.acquireInterruptibly(1);
+    }
+
+    @Override
+    public boolean tryLock() {
+        return sync.tryAcquire(1);
+    }
+
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        return sync.tryAcquireNanos(1,unit.toNanos(time));
+    }
+
+    @Override
+    public void unlock() {
+        sync.release(1);
+    }
+
+    @Override
+    public Condition newCondition() {
+        // 这里暂时不用
+        return null;
+    }
+
+    private class Sync extends AbstractQueuedSynchronizer{
+
+        @Override
+        protected boolean tryAcquire(int arg) {
+            // 当状态为0的时候，进来的线程获取到锁
+            if(compareAndSetState(0,1)){
+                setExclusiveOwnerThread(Thread.currentThread());
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        protected boolean tryRelease(int arg) {
+            //释放锁，将锁的状态设置为0
+            if(getState() == 0){
+                throw new IllegalStateException();
+            }
+            setExclusiveOwnerThread(null);
+            setState(0);
+            return true;
+        }
+    }
+}
+```
+&ensp;&ensp;上述例子中MyLock是一个独占锁，是一个自定义的同步组件，它在同一时刻只允许一个线程占有。在使用锁的时候不会使用锁内部的同步容器，而是使用自定义同步组件的方法，比如其中的Lock()方法。
 
 
 ## :hammer_and_wrench: 11.J.U.C
