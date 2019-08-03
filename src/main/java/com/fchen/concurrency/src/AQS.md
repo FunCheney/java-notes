@@ -1,5 +1,5 @@
 ## AbstractQueuedSynchronizer 
-&ensp;&ensp; 我们知道AbstractQueuedSynchronizer是依靠一个volatile修饰的int state 和 一个FIFO的队列来实现的。下面先来看看这个变量与队列。
+&ensp;&ensp; AbstractQueuedSynchronizer是依靠一个volatile修饰的int state 和 一个FIFO的队列来实现的。下面先来看看这个变量与队列。
 
 对同步状态的维护：
 ```
@@ -31,6 +31,8 @@ protected final boolean compareAndSetState(int expect, int update) {
 在AbstractQueuedSynchronizer中维护了一个Node类，用来构造FIFO的队列
 
 **结点模型**：
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/node.png "结点模型")
+
 
 ```
  static final class Node {
@@ -120,6 +122,7 @@ protected final boolean compareAndSetState(int expect, int update) {
     }
 ```
 **同步队列模型**：
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/sync.png "同步队列模型")
 
 
 对FIFO队列的维护：
