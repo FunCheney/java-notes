@@ -34,7 +34,7 @@ protected final boolean compareAndSetState(int expect, int update) {
 
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/node.png "结点模型")
 
-
+结点类:
 ```
  static final class Node {
         /** 等待队列中的节点类型，默认是共享的 */
@@ -138,7 +138,7 @@ private void setHead(Node node) {
     node.prev = null;
 }
 ```
-//FIFO队列中节点的入队操作
+FIFO队列中节点的入队操作
 ```
 private Node enq(final Node node) {
     for (;;) {
@@ -210,48 +210,6 @@ private Node addWaiter(Node mode) {
 }
 ```
 &ensp;&ensp;addWaiter(Node mode)方法保证了当前线程添加的节点在，正确的添加在FIFO队列的队尾。
-
-&ensp;&ensp;节点进入同步队列之后，就进入了一个自旋的过程，每个节点(或者说每个线程)，都在自省的观察，当条件满足，并获取到同步状态，就可以从这个自旋的过程中退出，否则依旧保留在这个自旋过程中。
-```
-final boolean acquireQueued(final Node node, int arg) {
-    boolean failed = true;
-    try {
-        boolean interrupted = false;
-        for (;;) {
-            // 获取当前节点的前驱节点
-            final Node p = node.predecessor();
-            // 当前驱节点为头结点时，独占的获取同步状态
-            if (p == head && tryAcquire(arg)) {
-                // 当前节点设置为头结点
-                setHead(node);
-                // 将前驱节点的下一结点的引用置为null
-                p.next = null; // help GC
-                failed = false;
-                return interrupted;
-            }
-            /**
-             * 前驱节点不是头结点
-             *  检查并更新节点的状态,到shouldParkAfterFailedAcquire()返回ture后
-             *  检查当前线程是否被中断
-             */
-            if (shouldParkAfterFailedAcquire(p, node) &&
-                parkAndCheckInterrupt())
-                interrupted = true;
-        }
-    } finally {
-        if (failed)
-            cancelAcquire(node);
-    }
-}
-```
-&ensp;&ensp;为什么只有前驱节点是头结点才获取同步状态？
-
-* 1.头结点是成功获取同步状态的节点，而头结点释放了同步状态之后，将会唤醒其后继节点，后继节点的线程被唤醒之后需要检查自己的前驱节点是不是头结点。
-
-* 2.维护同步队列的FIFO原则。
-
-
-
 
 
 ****
@@ -352,6 +310,7 @@ private void cancelAcquire(Node node) {
     }
 
 ```
+***
 
 ## 同步器提供的模板方法：
 ### 同步状态的获取
@@ -371,6 +330,45 @@ public final void acquire(int arg) {
 * 2.通过addWaiter(Node node)方法将该节点加入到同步队列尾部；
 
 * 3.最后调用acquireQueued(Node node,int arg)方法，使得该节点以“死循环”的方式获取同步状态，如果获取不到则阻塞节点中的线程，而被阻塞线程的唤醒主要依靠前驱节点的出队或阻塞线程被中断来实现。
+
+&ensp;&ensp;节点进入同步队列之后，就进入了一个自旋的过程，每个节点(或者说每个线程)，都在自省的观察，当条件满足，并获取到同步状态，就可以从这个自旋的过程中退出，否则依旧保留在这个自旋过程中。
+```
+final boolean acquireQueued(final Node node, int arg) {
+    boolean failed = true;
+    try {
+        boolean interrupted = false;
+        for (;;) {
+            // 获取当前节点的前驱节点
+            final Node p = node.predecessor();
+            // 当前驱节点为头结点时，独占的获取同步状态
+            if (p == head && tryAcquire(arg)) {
+                // 当前节点设置为头结点
+                setHead(node);
+                // 将前驱节点的下一结点的引用置为null
+                p.next = null; // help GC
+                failed = false;
+                return interrupted;
+            }
+            /**
+             * 前驱节点不是头结点
+             *  检查并更新节点的状态,到shouldParkAfterFailedAcquire()返回ture后
+             *  检查当前线程是否被中断
+             */
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                parkAndCheckInterrupt())
+                interrupted = true;
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+&ensp;&ensp;为什么只有前驱节点是头结点才获取同步状态？
+
+* 1.头结点是成功获取同步状态的节点，而头结点释放了同步状态之后，将会唤醒其后继节点，后继节点的线程被唤醒之后需要检查自己的前驱节点是不是头结点。
+
+* 2.维护同步队列的FIFO原则。
 
 独占式获取同步状态流程图
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/1.png "独占式获取同步状态")
