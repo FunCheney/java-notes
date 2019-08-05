@@ -283,7 +283,7 @@ Queue相关
 
  
  
- [AQS]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/AQS.md
+ [AQS]:https://mp.weixin.qq.com/s/7meggIhX8waD5DsMGizs0Q
  [并发编程中锁的分类总结]:https://mp.weixin.qq.com/s/vYuadfkQJytuPgNees16cQ
  [volatile关键字_01]:https://mp.weixin.qq.com/s/DFdImZ1srF-6OI_8ilRi8A
  [volatile关键字_02]:https://mp.weixin.qq.com/s/Z99y3oUYhqvi7uoaet5tZw
