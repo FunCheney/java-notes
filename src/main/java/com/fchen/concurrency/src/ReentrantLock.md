@@ -10,11 +10,11 @@
 
 &ensp;&ensp;通过这张类图，ReentrantLock实现了Lock接口，通过重写Lock接口中的方法来实现对应的锁的属性。通过ReentrantLock可以创建公平锁(FairSync)和非公平锁(NonfairSync)。
 
-![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/ReentrantLock1.png "ReentrantLock2")
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/ReentrantLock2.png "ReentrantLock2")
 
 &ensp;&ensp;通过这张类图，可以看到在ReentrantLock中，包含有一个抽象的内部类(Sync)，通过Sync来实现FairSync和NonfairSync。
 
-![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/ReentrantLock1.png "ReentrantLock3")
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/ReentrantLock3.png "ReentrantLock3")
 
 &ensp;&ensp;最后这张图可以看到，sync是AbstractQueuedSynchronizer的子类，这里和上篇文章中使用队列同步容器实现锁的使用方式一样。说明ReentrantLock的功能也是通过同步队列容器来实现的。只不过这里提供了公平锁与非公平锁两种形式。下面我们就分别来看看这两种锁。
 
