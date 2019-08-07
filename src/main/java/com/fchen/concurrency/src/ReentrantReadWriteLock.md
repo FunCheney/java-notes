@@ -1,2 +1,21 @@
-### ReentrantLock(读写锁)源码学习
+### ReentrantReadWriteLock(读写锁)源码学习
 &ensp;&ensp;读写锁，分为读锁和写锁两种。读锁可以允许多个线程同时访问，但是当线程访问写锁的时候，所有的读线程和其他的写线程都被阻塞。读写锁通过读写分离的方式提高了并发性能。
+
+读写锁的特性：
+
+特 性 | 说 明
+ ---|---
+ 公平选择 | 支持费公平(默认)和公平的锁获取方式，吞吐量还是非公平优于公平
+ 重进入 | 该锁支持重进入，以读写线程为例：读线程在获取读锁之后，能够再次获取读锁。而写线程在获取了写锁之后能够再次获取写锁，同时也可以获取读锁
+ 锁降级 | 遵循获取写锁、获取读锁再释放写锁的次序，写锁能够降级为读锁
+ 
+ 在ReadWriteLock接口中仅定义了获取读锁和写锁的两个方法，即ReadLock()和writeLock()方法。
+ 
+ 在ReentrantReadWriteLock中还提供了一些便于外界监控其内部工作状态的方法
+ 
+ 方法名称 | 描述
+  ---|---
+  int getReadLockCount() | 
+  int getReadHoldCount() |
+  boolean isWriteLocked() | 判断写锁是被获取
+  int getWriteHoldCount() | 返回当前写锁获取的次数
