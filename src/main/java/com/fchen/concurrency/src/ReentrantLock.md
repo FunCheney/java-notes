@@ -152,12 +152,13 @@ static final class NonfairSync extends Sync {
 非公平锁lock()方法的调用过程：
 
 以ReentrantLock#lock()方法为例(默认非公平锁)：
-   |-->sync.lock();
-     |-->NonfairSync#lock()
-       |-->AbstractQueuedSynchronizer#acquire(int arg)
-         |-->NonfairSync#tryAcquire(int acquires)
-           |-->Sync#nonfairTryAcquire(int acquires)
-   
+   ```
+      |-->sync.lock();
+        |-->NonfairSync#lock()
+          |-->AbstractQueuedSynchronizer#acquire(int arg)
+            |-->NonfairSync#tryAcquire(int acquires)
+              |-->Sync#nonfairTryAcquire(int acquires)
+   ```
 
 
 ### 公平锁(FairSync)的实现
