@@ -48,6 +48,4 @@ public class MyDemo {
             System.out.println(Thread.currentThread().getName()+ "写操作执行完毕");
         }
     }
-
-
 }
