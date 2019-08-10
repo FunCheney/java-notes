@@ -24,7 +24,8 @@
   int getWriteHoldCount() | 返回当前写锁获取的次数
   
   
- ####  首先来看一下读写锁的使用
+#### 首先来看一下读写锁的使用
+
 ```
 public class MyDemo {
     private Map<String,Object> map = new HashMap<>();
@@ -66,12 +67,14 @@ public class MyDemo {
 ```
 &ensp;&ensp;上述示例中使用对HashMap的读写来进行操作，同时使用读写锁来保证线程的安全。在读操作get(String key)方法中，需要获取读锁，可是使多个线程同时访问而不被阻塞。写操作put(String key, Object value);在操作时必须先获取写锁，在获取到写锁之后，其他线程对于读锁和写锁的获取均被阻塞，只有写锁被释放之后，其他的读写操作才可以继续。
 
- ####  读写锁的实现
+#### 读写锁的实现
+ 
  &ensp;&ensp;从上述例子来分析锁的调用过程：
  
  首先，通过readLock()和writeLock()方法拿到锁：
- ```
- private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+```
+private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
  private Lock r = readWriteLock.readLock();
  private Lock w = readWriteLock.writeLock();
 ```
@@ -84,6 +87,7 @@ public interface ReadWriteLock {
 }
 ```
 然后找到其实现类ReentrantReadWriteLock中的实现：
+
 ```
 public class ReentrantReadWriteLock{ 
     /** 通过内部类实现readerLock*/  
@@ -110,10 +114,11 @@ public class ReentrantReadWriteLock{
 &ensp;&ensp;这里先简单解释一下ReentrantReadWriteLock(boolean fair)构造方法，在这个方法中，首先根据fair的状态来创建公平或者非公平的同步器。
 然后通过this关键字将ReentrantReadWriteLock的实例对象传进去，这里之所以这样做，是为了能够在ReadLock和WriteLock内部类中使用外部类的同步容器。
 这里以ReadLock为例：
+
 ```
 protected ReadLock(ReentrantReadWriteLock lock) {
-        sync = lock.sync;
-    }
+      sync = lock.sync;
+}
 ```
 
 在结合类图来看一下：
@@ -122,67 +127,70 @@ protected ReadLock(ReentrantReadWriteLock lock) {
 
  其中ReadLock()和WriteLock() 是ReentrantReadWriteLock的内部类，并且实现了Lock()接口。
  
- ##### ReadLock的实现
- ```
-public static class ReadLock implements Lock, java.io.Serializable {
-      private static final long serialVersionUID = -5992448646407690164L;
-      //定义同步容器
-      private final Sync sync;
-      /**
-       * ReadLock的构造方法
-       */
-      protected ReadLock(ReentrantReadWriteLock lock) {
-          // 调用外部内的同步容器
-          sync = lock.sync;
-      }
-      /*=====下面的方法是Lock接口中的方法====*/
-      public void lock() {
-          sync.acquireShared(1);
-      }
-
-      public void lockInterruptibly() throws InterruptedException {
-          sync.acquireSharedInterruptibly(1);
-      }
-
-      public boolean tryLock() {
-          return sync.tryReadLock();
-      }
-
-      public boolean tryLock(long timeout, TimeUnit unit)
-              throws InterruptedException {
-          return sync.tryAcquireSharedNanos(1, unit.toNanos(timeout));
-      }
-
-      public void unlock() {
-          sync.releaseShared(1);
-      }
-
-      public Condition newCondition() {
-          throw new UnsupportedOperationException();
-      }
-
-      public String toString() {
-          int r = sync.getReadLockCount();
-          return super.toString() +
-              "[Read locks = " + r + "]";
-      }
-  }
+####ReadLock的实现
+ 
 ```
- ###### 读锁的获取与释放
+public static class ReadLock implements Lock, java.io.Serializable {
+    //定义同步容器
+    private final Sync sync;
+    /**
+     * ReadLock的构造方法
+     */
+    protected ReadLock(ReentrantReadWriteLock lock) {
+        // 调用外部内的同步容器
+        sync = lock.sync;
+    }
+    /*=====下面的方法是Lock接口中的方法====*/
+    public void lock() {
+        sync.acquireShared(1);
+    }
+
+    public void lockInterruptibly() throws InterruptedException {
+        sync.acquireSharedInterruptibly(1);
+    }
+
+    public boolean tryLock() {
+        return sync.tryReadLock();
+    }
+
+    public boolean tryLock(long timeout, TimeUnit unit)
+             throws InterruptedException {
+        return sync.tryAcquireSharedNanos(1, unit.toNanos(timeout));
+    }
+
+    public void unlock() {
+        sync.releaseShared(1);
+    }
+
+    public Condition newCondition() {
+        throw new UnsupportedOperationException();
+    }
+
+    public String toString() {
+        int r = sync.getReadLockCount();
+        return super.toString() +
+            "[Read locks = " + r + "]";
+    }
+}
+```
+#####读锁的获取与释放
+
  读锁是共享锁，所以这里调用acquireShared()共享获取同步状态的方法
- ```
+```
 public void lock() {
-       sync.acquireShared(1);
-   }
+   sync.acquireShared(1);
+}
 ```
 同理，读锁的释放
 ```
 public void unlock() {
-      sync.releaseShared(1);
-  }
+    sync.releaseShared(1);
+}
 ```
- ##### WriteLock的实现
- ```
+
+#### WriteLock的实现
+ 
+```
 public static class WriteLock implements Lock, java.io.Serializable {
      private static final long serialVersionUID = -4992448646407690164L;
      /**==这部分与ReadLock类似==*/
@@ -239,17 +247,20 @@ public static class WriteLock implements Lock, java.io.Serializable {
 }
 ```
  
- ###### 写锁的获取与释放
+###### 写锁的获取与释放
+
   写锁是排他锁，所以这里调用acquire()独占获取同步状态的方法
-  ```
- public void lock() {
-        sync.acquire(1);
-    }
- ```
+
+```
+public void lock() {
+    sync.acquire(1);
+}
+```
+
  同理，写锁的释放
- ```
- public void unlock() {
-       sync.release(1);
-   }
- ```
-  
+ 
+```
+public void unlock() {
+   sync.release(1);
+}
+```
