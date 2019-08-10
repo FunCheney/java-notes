@@ -118,6 +118,8 @@ protected ReadLock(ReentrantReadWriteLock lock) {
 
 在结合类图来看一下：
 
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/ReentrantReadWriteLock1.png "ReentrantReadWriteLock")
+
  其中ReadLock()和WriteLock() 是ReentrantReadWriteLock的内部类，并且实现了Lock()接口。
  
  ##### ReadLock的实现
