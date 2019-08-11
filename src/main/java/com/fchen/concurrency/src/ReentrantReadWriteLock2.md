@@ -31,9 +31,12 @@ static int sharedCount(int c)    { return c >>> SHARED_SHIFT; }
 static int exclusiveCount(int c) { return c & EXCLUSIVE_MASK; }
 
 ```
+
+&ensp;&ensp;上述代码中假设当前的同步状态的值为c，写状态的 c & 0x0000FFFF(将高位全部抹去)，读状态等于c >>> 16，无符号补0右移16位。
  
  #### 独占的获取与释放同步状态
  获取：
+ 
  &ensp;&ensp;tryAcquire()方法是独占的获取同步状态，因此是在ReentrantReadWriteLock#WriteLock中的lock()方法调用是用到。来看看他是如何实现的：
  ```
 protected final boolean tryAcquire(int acquires) {
@@ -225,7 +228,9 @@ static final class ThreadLocalHoldCounter
     }
 }
 ```
+
  释放：
+ 
   ```
  protected final boolean tryReleaseShared(int unused) {
      //获取到当前线程
@@ -262,6 +267,8 @@ static final class ThreadLocalHoldCounter
      }
  }     
  ```
+ &ensp;&ensp;读锁的每次释放(线程安全，可能有多个线程在同时释放读锁)都减少读状态，每次减少的值为(1<<16)。
+ 
  ##### 锁降级
  &ensp;&ensp;锁的降级是指写锁降级为读锁。如果当前线程拥有写锁，然后将其释放，最后再获取读锁，这种分段完成的过程不能称之为锁降级。
  锁降级是指把持住(当前拥有的)写锁，再获取到读锁，随后释放(先前拥有的)写锁的过程。
