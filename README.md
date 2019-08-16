@@ -258,7 +258,7 @@ public class MyLock implements Lock {
 ## :hammer_and_wrench: 11.J.U.C
 J.U.C 中源码相关阅读笔记
 
-locks包下面
+### locks包下面
 * [AQS]
 * [ReentrantLock]
 * ReentrantReadWriteLock
@@ -268,8 +268,11 @@ locks包下面
 &ensp;&ensp;&ensp;&ensp; 2. ReentrantReadWriteLock的源码学习之同步容器的实现
 * LockSupport
 * Condition
-
-atomic包下面
+### Java并发容器和框架
+* ConcurrentHashMap
+* ConcurrentLinkedQueue
+* 阻塞队列
+### atomic包下面
 * AtomicInteger
 * AtomicIntegerFieldUpdater
 * AtomicReference
