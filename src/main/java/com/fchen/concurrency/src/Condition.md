@@ -34,3 +34,189 @@ public interface Condition {
  
  
  ##### Condition 使用代码示例
+ ```
+public class ConditionUseCase {
+    /** 创建锁*/
+    private Lock lock = new ReentrantLock();
+    /** 使用锁的newCondition()方法*/
+    private Condition condition = lock.newCondition();
+    
+    public void conditionWait(){
+     lock.lock();
+     try {
+         /** 调用Condition的await() 方法*/
+         condition.await();
+     } catch (InterruptedException e) {
+         e.printStackTrace();
+     } finally {
+         lock.unlock();
+     }
+    }
+    
+    public void conditionSingal(){
+     lock.unlock();
+     try {
+         /** 调用condition的signal()方法*/
+         condition.signal();
+     } finally {
+         lock.unlock();
+     }
+    }
+}
+```
+&ensp;&ensp;在使用Condition对象时，一般会将Condition对象作为成员变量。当调用await()方法后，当前线程会释放锁并在此等待，而其他线程调用Condition对象的signal()方法，通知当前线程后，当前线程才从await()方法返回，并且在返回前已经获取了锁。
+
+**使用Condition完成线程的顺序执行:**
+
+&ensp;&ensp;假设有三个线程T1,T2,T3执行，通过Condition对象使得者三个线程按照T1，T2，T3顺序执行：
+
+```
+public class MyDemo {
+
+    private  int flag;
+    Lock lock = new ReentrantLock();
+    Condition test1 = lock.newCondition();
+    Condition test2 = lock.newCondition();
+    Condition test3 = lock.newCondition();
+
+    public  void test1(){
+        lock.lock();
+        while (flag != 0){
+            try {
+                test1.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("T1线程执行");
+        flag++;
+        test2.signal();
+        lock.unlock();
+    }
+
+    public void test2(){
+        lock.lock();
+        while (flag != 1){
+            try {
+                test2.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("T2线程执行");
+        flag++;
+        test3.signal();
+        lock.unlock();
+    }
+
+    public void test3(){
+        lock.lock();
+        while (flag != 2){
+            try {
+                test3.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("T3线程执行");
+        flag = 0;
+        test1.signal();
+        lock.unlock();
+    }
+
+    public static void main(String[] args) {
+        MyDemo demo = new MyDemo();
+        Thread1 a = new Thread1(demo);
+        Thread2 b = new Thread2(demo);
+        Thread3 c = new Thread3(demo);
+
+        new Thread(a).start();
+        new Thread(b).start();
+        new Thread(c).start();
+    }
+}
+```
+
+Thread1类:
+
+```
+public class Thread1 implements Runnable{
+    private MyDemo demo;
+
+    public Thread1(MyDemo demo) {
+        this.demo = demo;
+    }
+
+    @Override
+    public void run() {
+        while (true){
+            demo.test1();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+Thread2类
+```
+
+public class Thread2 implements Runnable{
+    private MyDemo demo;
+
+    public Thread2(MyDemo demo) {
+        this.demo = demo;
+    }
+
+    @Override
+    public void run() {
+        while (true){
+            demo.test2();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+``` 
+Thread3类
+
+```
+public class Thread3 implements Runnable{
+    private MyDemo demo;
+
+    public Thread3(MyDemo demo) {
+        this.demo = demo;
+    }
+
+    @Override
+    public void run() {
+        while (true){
+            demo.test3();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+执行结果：
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
