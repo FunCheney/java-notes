@@ -293,6 +293,13 @@ Queue相关
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/way.jpg "处理方式与手段")
 
 
+### 缓存
+
+### 队列
+
+
+### RPC
+
 
 [Condition使用示例]:https://mp.weixin.qq.com/s/3LBExINGMipnBaKj27eRSA
 [ReentrantReadWriteLock的源码学习之同步容器的实现]:https://mp.weixin.qq.com/s/A6d940S3InLynoOqkvknJw
