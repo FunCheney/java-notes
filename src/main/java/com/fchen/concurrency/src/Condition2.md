@@ -30,14 +30,14 @@ public final void await() throws InterruptedException {
     // 判断node是否在同步队列中
     int interruptMode = 0;
     while (!isOnSyncQueue(node)) {
-        // 不在同步队列中，一直阻塞
+        // 不在同步队列中，一直阻塞等待唤醒
         LockSupport.park(this);
         if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
             break;
     }
-    //当等待对类中的节点被唤醒
+    //当等待队列中的节点被唤醒，当前节点被放入同步队列中
     
-    // 将节点node加入到同步队列中
+    // acquireQueued方法加入到获取同步状态的竞争中，抢占cpu资源
     if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
         interruptMode = REINTERRUPT;
     if (node.nextWaiter != null)
@@ -48,9 +48,13 @@ public final void await() throws InterruptedException {
 }
 ```
 
-&ensp;&ensp;调用该方法的线程成功获取了锁的线程，也就是同步队列中的首节点，该方法会将当前线程构造成节点并加入到等待队列中，然后释放同步状态，唤醒同步队列中的后继节点，然后当前线程会进入等待状态。
+&ensp;&ensp;调用该方法的线程成功获取了锁的线程(也就是同步队列中的首节点)，该方法会将当前线程构造成节点并加入到等待队列中，然后释放同步状态，唤醒同步队列中的后继节点，然后当前线程会进入等待状态。
 
 &ensp;&ensp;当等待队列中的节点被唤醒，则唤醒节点的线程开始尝试获取同步状态。如果不是通过其他线程调用Condition的signal()方法唤醒，而是对线程中断，则会抛出InterceptedException。
+
+await()方法加入等待队列图示：
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/await.jpg "waitQueue")
 
 
 **addConditionWaiter()方法**
@@ -149,10 +153,6 @@ final int fullyRelease(Node node) {
 }
 ```
 
-await()方法加入等待队列图示：
-
-![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/await.jpg "waitQueue")
-
 **signal()通知方法：**
 
 ```
@@ -169,6 +169,11 @@ public final void signal() {
 }
 ```
 &ensp;&ensp;执行signal()的线程必须是获取了锁的线程。并且按照队列先进先出的特点，将等待队列中的首节点移动到同步队列中。
+
+signal()方法加入同步队列图示：
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/signal.jpg "signal")
+
 
 **doSignal()方法：**
 ```
@@ -213,10 +218,6 @@ final boolean transferForSignal(Node node) {
     return true;
 }
 ```
-
-signal()方法加入同步队列图示：
-
-![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/signal.jpg "signal")
 
 &ensp;&ensp;被唤醒后的线程，将从await()方法中的while循环中退出(isOnSyncQueue(node)方法返回true，节点已经进入到同步队列中)，进而调用同步器的acquireQueued()方法加入到获取同步状态的竞争中。
 
