@@ -1,11 +1,14 @@
 ### Condition实现原理
 
-&ensp;&ensp;ConditionObject是同步器AbstractQueuedSynchronizer的内部类，Condition的操作要获取相关联的锁。每个Condition对象都包含者一个队列(等待队列)，该队列是实现等待/通知功能的关键。
+&ensp;&ensp;ConditionObject是同步器AbstractQueuedSynchronizer的内部类，Condition的操作要获取相关联的锁,通过使用Lock接口中的newCondition()方法获取Condition对象。每个Condition对象都包含者一个队列(等待队列)，该队列是实现等待/通知功能的关键。
 
 #### 等待队列
 &ensp;&ensp;经过前面的学习我们知道，在AQS中维护着一个同步的FIFO队列，用来完成同步状态的获取。同步队列的维护是通过head，tail节点构造的双向链表来实现的。等待队列与同步队列都是公用一个节点类(AQS中的Node类)来是实现的。
 
 &ensp;&ensp;等待队列是一个FIFO队列，该队列的维护是通过firstWaiter，lastWaiter节点构造的单向链表来实现的。在队列中的每个节点都包含了一个线程的引用，该线程就是Condition对象上的等待线程，如果一个线程调用了Condition.await()方法，那么该线程释放锁、构造节点加入等待队列并进入等待状态。
+
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/waitQueue.jpg "waitQueue")
 
 #### ConditionObject实现类中的方法
 
@@ -146,49 +149,77 @@ final int fullyRelease(Node node) {
 }
 ```
 
-**signal()方法：**
+await()方法加入等待队列图示：
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/await.jpg "waitQueue")
+
+**signal()通知方法：**
 
 ```
 public final void signal() {
+    // 检查是否为独占状态
     if (!isHeldExclusively())
+        // 不是独占状态抛出异常
         throw new IllegalMonitorStateException();
+    // 拿到等待队列的第一个节点    
     Node first = firstWaiter;
     if (first != null)
+        // 等待队列中的第一个节点不为空，将其放入同步对列中
         doSignal(first);
 }
 ```
+&ensp;&ensp;执行signal()的线程必须是获取了锁的线程。并且按照队列先进先出的特点，将等待队列中的首节点移动到同步队列中。
 
 **doSignal()方法：**
 ```
 private void doSignal(Node first) {
     do {
+        // 首节点指向首节点的下一节点 并判断其是否为null
         if ( (firstWaiter = first.nextWaiter) == null)
+            /**
+              * 首节点的下一节点为null，说明当前等待队列中没有等待的线程
+              * 因此，将等待队列中的最后一个节点置为null
+              */
             lastWaiter = null;
+         // 若首节点的下一节点不为null，将首节点从等待队列中拿出来
         first.nextWaiter = null;
-    } while (!transferForSignal(first) &&
-         (first = firstWaiter) != null);
+        /**
+          * 等待队列中的节点加入同步队列失败，
+          * 且等待队列中首节点不为null，则一直循环
+          */
+    } while (!transferForSignal(first) && (first = firstWaiter) != null);
 }
 ```
 
 **transferForSignal()方法：**
+
+&ensp;&ensp;该方法的主要作用是将等待队列中首节点加入到同步队列中，加入成功返回true，否则返回false。
+
 ```
 final boolean transferForSignal(Node node) {
-    /*
-     * If cannot change waitStatus, the node has been cancelled.
-     */
+    // CAS 设置当前线程构造的节点中的同步状态为0
     if (!compareAndSetWaitStatus(node, Node.CONDITION, 0))
         return false;
-
-    /*
-     * Splice onto queue and try to set waitStatus of predecessor to
-     * indicate that thread is (probably) waiting. If cancelled or
-     * attempt to set waitStatus fails, wake up to resync (in which
-     * case the waitStatus can be transiently and harmlessly wrong).
-     */
+    /**
+      * 节点的状态设置成功，调用enq(node)方法，
+      * 将其加入到同步队列中
+      */    
     Node p = enq(node);
+    // 获取当前节点的等待状态
     int ws = p.waitStatus;
     if (ws > 0 || !compareAndSetWaitStatus(p, ws, Node.SIGNAL))
+        // 唤醒该节点的线程
         LockSupport.unpark(node.thread);
     return true;
 }
 ```
+
+signal()方法加入同步队列图示：
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/image/signal.jpg "signal")
+
+&ensp;&ensp;被唤醒后的线程，将从await()方法中的while循环中退出(isOnSyncQueue(node)方法返回true，节点已经进入到同步队列中)，进而调用同步器的acquireQueued()方法加入到获取同步状态的竞争中。
+
+
+&ensp;&ensp;成功获取同步状态(锁)之后，被唤醒的线程将从先前调用的await()返回，此时该线程已经成功获取了锁。
+
