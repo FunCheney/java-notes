@@ -292,10 +292,45 @@ Queue相关
 ## :link:  高并发处理思路与手段
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/way.jpg "处理方式与手段")
 
-
 ### 缓存
 
+
 ### 队列
+
+#### RabbitMQ
+&ensp;&ensp;RabbitMQ是一个开源的消息代理和队列服务器，用来通过普通协议在完全不同的应用之间共享数据，RabbitMQ是基于AMQP协议的。
+
+* 可靠性投递模式
+
+* 返回模式
+
+集群模型
+
+* 表达式配置
+
+* HA模式
+
+* 镜像队列模型
+
+高性能的原因
+
+1.Erlang语言最初在于交换机领域的架构模式，这样使得RabbitMQ在Broker之间进行数据交互的性能非常优秀；
+
+2.Erlang有着和原生Socket一样的延迟。
+
+
+
+
+#### AMQP
+* AMQP全称：Advanced Message Queuing Protocol (高级消息队列协议)
+
+* AMQP定义：
+
+&ensp;&ensp;是具有现代特征的二进制协议。是一个提供统一消息服务的应用层标准高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计。
+
+* AMQP协议模型：
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/amqp.jpg "AMQP协议模型")
 
 
 ### RPC
