@@ -41,7 +41,7 @@ Exchange：接收消息，并更具路由键转发消息所绑定的队列
 
 * 匹配规则如下：
 
-![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/rabbitmq_4_exchange.jpg "Topic")
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/rabbitmq_4_exchange.jpg "fanout")
 
 * Durability：是否需要持久化，true为持久化
 
