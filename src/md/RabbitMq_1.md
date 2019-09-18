@@ -14,7 +14,7 @@
 
 **可靠性投递的解决方案**
 
-_**1.消息落库，对消息进行打标_**
+_1.消息落库，对消息进行打标_
 
 &ensp;&ensp;解释：
 ```
@@ -41,7 +41,7 @@ _**1.消息落库，对消息进行打标_**
 
 &ensp;&ensp;上述的解决方案中有两次数据库持久化操作，第一次保存业务数据，第二次要处理消息数据，对消息进行记录。这样一来在数据量不是很大的情况下，完全满足需求。但是随着消息的数量增加，这样一来瓶颈就会出现在数据库。于是，就有了下面的另一种解决方案。
 
-_**2.消息的延迟投递，做二次确认，回调检查_**
+_2.消息的延迟投递，做二次确认，回调检查_
 
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/可靠性投递_2.jpg "延迟投递回调检查解决方案")
 
@@ -99,9 +99,10 @@ _**2.消息的延迟投递，做二次确认，回调检查_**
 
 &ensp;&ensp;生产者进行接收应答，用来确定这条消息是否正常发送到Broker。这种方式也是消息的可靠性投递的核心保障。
 
-确认机制流程图：
+确认机制：
 
-![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/confirm_1 "Confirm消息机制")
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/confirm_1.jpg "Confirm消息机制")
+
 
 如何实现：
 
