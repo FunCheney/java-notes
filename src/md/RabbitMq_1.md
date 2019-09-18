@@ -101,7 +101,7 @@
 
 确认机制流程图：
 
-![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/可靠性投递_2.jpg "Confirm消息机制")
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/confirm_1 "Confirm消息机制")
 
 如何实现：
 
@@ -114,6 +114,190 @@
 &ensp;&ensp;Return Listener用于处理一些不可路由的消息。
 
 &ensp;&ensp;消息生产者，通过制定的一个Exchange和Routingkey，把消息送达到某一个队列中去，然后消费者监听队列，进行消费处理。
+
+&ensp;&ensp;在某种情况下，如过在发送消息的时候，当前的exchange不存在或者指定的路由key路由不到，这个时候需要监听这种不可达的消息，就要使用Return Listener
+
+* API的配置
+
+Mandatory：如果为true，则监听器会接收到路由不可达的消息，然后进行后续的处理，如果为false，那么broker端自动删除该消息；
+
+Return机制流程图：
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/return_1.jpg "Confirm消息机制")
+
+### 消费端自定义监听
+
+&ensp;&ensp;使用自定义的Consumer，解耦性更加的强。通过创建类实现DefaultConsumer类，并重写handlerDelivery()方法。
+
+
+### 消费端限流
+
+什么是消费端限流？
+
+&ensp;&ensp;假设一个场景，首先，我们RabbitMQ服务器有成千上万条未处理的消息， 我们随便打开一个消费者客户端，会出现下面情况：
+
+a. 巨量的消息瞬间全部推送过来，但是我们单个客户端无法同时处理这么多数据！
+
+b. 轻则消费端卡顿。重则宕机
+
+&ensp;&ensp;RabbitMq提供了一种qos(服务质量保证)功能，即在非自动确认消息的前提下，如果一定数目的消息(通过consumer或者channel设置qos的值)未被确认前，不进行消费新的消息。
+
+&ensp;&ensp;void BasicQos(unit prefetchSize,ushort prefetchCount, bool global);
+
+1.prefetchSize:消息的限制大小，消费端一般设置为0；
+
+2.prefetchCount表示一次处理多少条消息，一般设置为1；
+
+3.global表示限流策略在什么地方应用，在rabbitMq中有两个不同的级别，一个是channel(global为true)，一个是consumer(一个channel可以有多个consumer监听)。
+
+&ensp;&ensp;prefetchSize和global这两项，rabbitmq没有实现，暂且不研究。prefetchCount在no_ask=false的情况下生效，即在自动应答的情况下这两个值是不生效的。
+
+代码示例：
+
+消息的生产端：
+```java
+public class Producer {
+
+    public static void main(String[] args) throws IOException, TimeoutException {
+        ConnectionFactory connectionFactory = RabbitMqUtil.getConnectionFactory();
+        Connection connection = connectionFactory.newConnection();
+        Channel channel = connection.createChannel();
+
+        String exchangeName = "test_qos_exchange";
+        String routingKey = "qos.save";
+
+        String msg = "Hello RabbitMQ QOS Message";
+        for (int i = 0; i < 5; i++) {
+            channel.basicPublish(exchangeName, routingKey, true, null, msg.getBytes());
+        }
+    }
+}
+```
+消息的消费端：
+
+```java
+public class Consumer {
+
+
+    public static void main(String[] args) throws IOException, TimeoutException {
+        ConnectionFactory connectionFactory = RabbitMqUtil.getConnectionFactory();
+        Connection connection = connectionFactory.newConnection();
+        Channel channel = connection.createChannel();
+
+        String exchangeName = "test_qos_exchange";
+        String queueName = "test_qos_queue";
+        String routingKey = "qos.#";
+
+        channel.exchangeDeclare(exchangeName, "topic", true, false, null);
+        channel.queueDeclare(queueName, true, false, false, null);
+        channel.queueBind(queueName, exchangeName, routingKey);
+
+
+        //限流方式 第一件事就是将 autoAck 设置为false
+
+        /**
+         * @param prefetchSize  消息大小限制 一般为0 不限制
+         * @param prefetchCount 一次最多处理消息个数
+         *        会告诉RabbitMQ不要同时给一个消费者推送多余N个消息，即一旦有N个消息还没有ack,则该consumer将block掉。直到有消息ack
+         * @param global       true/false 是否将上面设置应用于channel。
+         *                                简单说。就是上面限制是channel级别还是consumer级别。
+         */
+        channel.basicQos(0, 1, false);
+
+        channel.basicConsume(queueName, false, new MyConsumer(channel));
+
+
+    }
+}
+```
+
+```java
+public class MyConsumer extends DefaultConsumer {
+    private Channel channel;
+
+
+    MyConsumer(Channel channel) {
+        super(channel);
+        this.channel = channel;
+    }
+
+    @Override
+    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        System.err.println("-----------consume message----------");
+        System.err.println("consumerTag: " + consumerTag);
+        System.err.println("envelope: " + envelope);
+        System.err.println("properties: " + properties);
+        System.err.println("body: " + new String(body));
+
+        //ack应答
+        channel.basicAck(envelope.getDeliveryTag(), false);
+    }
+}
+```
+
+### 消费端的ACk与重回队列
+
+* 消费端的手工ACk和NACK
+
+&ensp;&ensp;channel.basicConsume方法的第二个参数(autoAck)设置为false即可。手动签收又分为两种方式，一种是Ack(确认)和Nack(失败)。
+
+两种方式的区别：
+
+ACK:表示手工签收后消息处理成功；
+
+NACk:表示手动签合后消息处理失败。这个时候broker会自动重新发送消息。
+
+
+使用场景：
+
+场景一：
+
+假设我们设置的自动重复消息次数是3次，那么在Nack后，broker会重复发送三次消息。如果三次之后，还是Nack的，这种情况下，我们不可能一直重复发送，此时就可以设置为Ack,然后在消费端进行消费的时候，如果由于业务处理而产生的异常，我们可以进行日志的记录或者给开发人员发送警报邮件，然后进行补偿。
+
+场景二：
+
+如果由于服务器宕机等严重性的问题，此时是不可能收到ack或者Nack,这种情况下也会一直重复发送消息的，那么我们就需要手工的Ack,来保证消费端消费成功。在服务器重启之后，会自动的消费之前未消费成功的消息的。
+
+
+### 消费端的重回队列
+
+&ensp;&ensp;对没有处理成功的消息，把消息重新回递给Broker。在一般我们在实际的应用中，都会关闭重回队列，也就是设置未false
+
+
+### TTL队列/消息
+
+&ensp;&ensp;TTL：Time To Live 的缩写，也就是生存时间。RabbitMQ支持消息的过期时间，在消息发送的时候可以进行设置。RabbitMQ支持队列的过期时间，从消息如队列开始计算，只要超过了队列的超时时间配置，那么消息会自动的清除。
+
+### 死信队列
+
+&ensp;&ensp;死信队列：DLX，Dead-Letter-Exchange。消息在队列中没有消费者消费，表示该消息已经变为死信(dead  message)。该消息会被publish到另一个Exchange，这个Exchange就是死信队列(DLX)。
+
+&ensp;&ensp;DLX也是一个正常的Exchange，和一般的Exchange没有区别，它能在任何队列上被指定，实际上就是设置某个队列的属性。
+
+&ensp;&ensp;当这个队列中有死信时，RabbitMq就会自动将这个消息重新发布到设置的Exchange上去，进而被路由到另一个队列。
+
+&ensp;&ensp;可以监听这个队列中的消息进行相应的处理。
+
+消息变成死信的情况：
+
+* 消息被拒绝(basic.reject/basic.nack)并且requeue=false
+
+* 消息TTL过期
+
+* 队列达到最大长度
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
