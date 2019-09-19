@@ -104,6 +104,9 @@ _2.消息的延迟投递，做二次确认，回调检查_
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/confirm_1.jpg "Confirm消息机制")
 
 
+
+
+
 如何实现：
 
 1.在channel上开启确认模式：channel.confirmSelect()
