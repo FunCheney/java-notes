@@ -361,6 +361,8 @@ RabbitMQ消息流转
 
 * [RabbitMq高级特性]
 
+* [RabbitMq集群架构模式]
+
 
 
 ### RPC
@@ -387,3 +389,5 @@ RabbitMQ消息流转
  
  [RabbitMq的一些核心概念]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_Exchange.md
  [RabbitMq高级特性]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_1.md
+ [RabbitMq集群架构模式]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_2.md
+ 
