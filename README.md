@@ -363,6 +363,9 @@ RabbitMQ消息流转
 
 * [RabbitMq集群架构模式]
 
+* [RabbitMq消息发送模式]
+
+
 
 
 ### RPC
