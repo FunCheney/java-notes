@@ -104,13 +104,6 @@ private transient volatile Node<K,V>[] nextTable;
 private transient volatile long baseCount;
 
 /**
-* 该属性用来控制table数组的大小，根据是否初始化和是否正在扩容有几种情况：
-  **当值为负数时：**如果为-1表示正在初始化，如果为-N则表示当前正有N-1个线程进行扩容操作；
-  **当值为正数时：**如果当前数组为null的话表示table在初始化过程中，sizeCtl表示为需要新建数组的长度；
-  若已经初始化了，表示当前数据容器（table数组）可用容量也可以理解成临界值（插入节点数超过了该临界值就需要扩容），具体指为数组的长度n 乘以 加载因子loadFactor；
-  当值为0时，即数组长度为默认初始值
-*/
-/**
  * 控制Table的初始化与扩容。
  *   当值为负数时table正在被初始化或扩容
  *     -1表示正在初始化
