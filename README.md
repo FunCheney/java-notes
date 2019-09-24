@@ -371,6 +371,7 @@ RabbitMQ消息流转
 ### RPC
 
 [ConcurrentHashMap]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
+
 [Condition实现原理及源码分析]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/Condition2.md
 [Condition使用示例]:https://mp.weixin.qq.com/s/3LBExINGMipnBaKj27eRSA
 [ReentrantReadWriteLock的源码学习之同步容器的实现]:https://mp.weixin.qq.com/s/A6d940S3InLynoOqkvknJw
@@ -388,7 +389,7 @@ RabbitMQ消息流转
 [多线程下的单例模式_01]:https://mp.weixin.qq.com/s/57B7I7zjruOPN_8YVUP4LA
 [多线程下的单例模式_02]:https://mp.weixin.qq.com/s/UQPR42fAPB3UfNwvto7MuA
 [线程间通信]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/example/waitnotify/wait_notify.md
-[线程的状态及状态之间转换]https://github.com/FunCheney/concurrency/blob/master/src/md/ThreadSafe.md#computer1-线程的生命周期
+[线程的状态及状态之间转换]:https://github.com/FunCheney/concurrency/blob/master/src/md/ThreadSafe.md#computer1-线程的生命周期
  
  
  
