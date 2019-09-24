@@ -1,5 +1,3 @@
-# concurrency
-并发编程学习
 ## :computer:1. 线程的生命周期
 
 线程间状态转换：
