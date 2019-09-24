@@ -274,7 +274,7 @@ J.U.C 中源码相关阅读笔记
 &ensp;&ensp;&ensp;&ensp; 2. [Condition实现原理及源码分析] 
    
 ### Java并发容器和框架
-* ConcurrentHashMap
+* [ConcurrentHashMap]
 * ConcurrentLinkedQueue
 * 阻塞队列
 ### atomic包下面
