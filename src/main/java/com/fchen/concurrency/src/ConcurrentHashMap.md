@@ -1,7 +1,7 @@
 ## ConcurrentHashMap
 &ensp;&ensp;ConcurrentHashMap是线程安全的HashMap；在并发的情况下使用HashMap可能会导致死循环，在进行put操作时导致CPU利用率接近100%。是因为在多线程会导致HashMap的Entry链表形成环形数据结构，一旦形成环形数据结构，Entry的next结点永远不能为空，就会产生死循环获取Entry。
 
-&ensp;&ensp;在JDk1.8中ConcurrentHashMap采用Node + CAS + Synchronized来保证并发情况下的更新不会出现问题。其底层的数据结构是：数组 + 链表 / 红黑树 的方式来实现的。
+&ensp;&ensp;在JDk1.8中ConcurrentHashMap采用Node + CAS + Synchronized来保证并发情况下的更新不会出现问题。其底层的数据结构是：数组 + 链表 + 红黑树 的方式来实现的。
 
 注：[点击了解红黑树]。
 
@@ -83,7 +83,7 @@ static final int HASH_BITS = 0x7fffffff; // usable bits of normal node hash
 ```
 
 #### 关键属性
-```java
+```
 /**
  * 装载Node的数组，作为ConcurrentHashMap的数据容器，
  * 采用懒加载的方式，直到第一次插入数据的时候才会进行初始化操作，
@@ -96,12 +96,6 @@ transient volatile Node<K,V>[] table;
  */
 private transient volatile Node<K,V>[] nextTable;
 
-/**
- * Base counter value, used mainly when there is no contention,
- * but also as a fallback during table initialization
- * races. Updated via CAS.
- */
-private transient volatile long baseCount;
 
 /**
  * 控制Table的初始化与扩容。
@@ -116,6 +110,7 @@ private transient volatile int sizeCtl;
 #### 内部类
 
 ##### Node 类
+&ensp;&ensp; Node是最核心的内部类，它包装了key-value键值对，所有插入ConcurrentHashMap的数据都包装在这里面。Node类实现了Map.Entry<K,V>接口，Node类中包含有属性有key，value以及下一节点的引用，其中value和next属性使用volatile关键字修饰，保证其在多线程下的可见性。不允许调用setValue方法直接改变Node的value域，它增加了find方法辅助map.get()方法。
 
 ```java
 static class Node<K,V> implements Map.Entry<K,V> {
@@ -123,7 +118,9 @@ static class Node<K,V> implements Map.Entry<K,V> {
     final K key;
     volatile V val;
     volatile Node<K,V> next;
-
+    /**
+    * Node结点的构造方法
+    */
     Node(int hash, K key, V val, Node<K,V> next) {
         this.hash = hash;
         this.key = key;
@@ -148,9 +145,6 @@ static class Node<K,V> implements Map.Entry<K,V> {
                 (v == (u = val) || v.equals(u)));
     }
 
-    /**
-     * Virtualized support for map.get(); overridden in subclasses.
-     */
     Node<K,V> find(int h, Object k) {
         Node<K,V> e = this;
         if (k != null) {
@@ -167,10 +161,9 @@ static class Node<K,V> implements Map.Entry<K,V> {
 ```
 
 ##### TreeNode类
+&ensp;&ensp;树节点类，另外一个核心的数据结构，包含父接点，左链接的结点，右链接的结点，前驱结点的引用，以及结点的颜色(默认红色)。当链表长度过长的时候，会转换为TreeNode在TreeBins中使用。TreeNode是上述Node类的子类。
 ```java
-/**
- * Nodes for use in TreeBins
- */
+
 static final class TreeNode<K,V> extends Node<K,V> {
     TreeNode<K,V> parent;  // red-black tree links
     TreeNode<K,V> left;
@@ -178,6 +171,7 @@ static final class TreeNode<K,V> extends Node<K,V> {
     TreeNode<K,V> prev;    // needed to unlink next upon deletion
     boolean red;
 
+    
     TreeNode(int hash, K key, V val, Node<K,V> next,
              TreeNode<K,V> parent) {
         super(hash, key, val, next);
@@ -189,32 +183,73 @@ static final class TreeNode<K,V> extends Node<K,V> {
     }
 
     /**
-     * Returns the TreeNode (or null if not found) for the given key
-     * starting at given root.
+     * 通过给定的key从指定的根节点开始(在其子树)查找
+     * 对应的TreeNode结点，没有返回null
+     * h 表示当前可以的Hash值
+     * k 要查找的键(key)
+     * kc k的Class对象，该Class应该是实现了Comparable<K>的，否则应该是null
      */
     final TreeNode<K,V> findTreeNode(int h, Object k, Class<?> kc) {
+        // 判断对应的键是否为null
         if (k != null) {
+            //获取当前结点
             TreeNode<K,V> p = this;
-            do  {
+            do  { //循环
                 int ph, dir; K pk; TreeNode<K,V> q;
                 TreeNode<K,V> pl = p.left, pr = p.right;
                 if ((ph = p.hash) > h)
+                    /**
+                    *  当前结点的Hash值大于要查找的Key的Hash值H
+                    *  在当前节点的左子树中查找，反之在右子树中
+                    *  进行下一轮循环
+                    */
                     p = pl;
                 else if (ph < h)
                     p = pr;
                 else if ((pk = p.key) == k || (pk != null && k.equals(pk)))
+                    /**
+                    *  当前结点的key等于要查找的key，
+                    *  或当前结点的key不为null且equals()方法为true
+                    *  返回当前的结点
+                    */
                     return p;
+                
+                    
+                /**
+                * 执行到这里说明 hash比对相同，
+                * 但当前节点的key与要查找的k不相等
+                */ 
                 else if (pl == null)
+                    /**
+                    * 左孩子为空，指向当前节点右孩子，继续循环
+                    */
                     p = pr;
                 else if (pr == null)
+                    /**
+                     * 右孩子为空，指向当前节点左孩子，继续循环
+                     */
                     p = pl;
+                /**
+                 * 左右孩子都不为空，再次进行比较，
+                 * 确定在左子树还是右子树中查找 
+                 */    
                 else if ((kc != null ||
                           (kc = comparableClassFor(k)) != null) &&
                          (dir = compareComparables(kc, k, pk)) != 0)
+                    /**
+                     * comparable方法来比较pk和k的大小
+                     * dir小于0，p指向左孩子，否则指向右孩子
+                     */
                     p = (dir < 0) ? pl : pr;
+                    
+                /**
+                 *  无法通过上一步骤确定是在左/右子树中查找
+                 *  从右子树中递归调用findTreeNode()方法查找
+                 */    
                 else if ((q = pr.findTreeNode(h, k, kc)) != null)
                     return q;
                 else
+                    //在右子树中没有找到，到左子树中查找
                     p = pl;
             } while (p != null);
         }
@@ -223,6 +258,7 @@ static final class TreeNode<K,V> extends Node<K,V> {
 }
 ```
 ##### TreeBin类
+&ensp;&ensp;红黑树结构。该类并不包装key-value键值对，而是TreeNode的列表和它们的根节点。这个类含有读写锁。
 
 ```java
 static final class TreeBin<K,V> extends Node<K,V> {
