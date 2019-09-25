@@ -74,12 +74,15 @@ private static final int RESIZE_STAMP_SHIFT = 32 - RESIZE_STAMP_BITS;
 
 /* forwarding nodes的hash值*/
 static final int MOVED     = -1; 
+
 /* 树根节点的hash值*/
 static final int TREEBIN   = -2; 
+
 /* ReservationNode的hash值*/
-static final int RESERVED  = -3; // hash for transient reservations
+static final int RESERVED  = -3; 
+
 /* 普通节点哈希的可用位*/
-static final int HASH_BITS = 0x7fffffff; // usable bits of normal node hash
+static final int HASH_BITS = 0x7fffffff;
 ```
 
 #### 关键属性
