@@ -280,75 +280,153 @@ static final class TreeBin<K,V> extends Node<K,V> {
         static final int READER = 4; // increment value for setting read lock
 
         /**
-         * 通过结点b构造红黑树
+         * 通过结点b构造红黑树，链表转红黑树
          */
         TreeBin(TreeNode<K,V> b) {
             super(TREEBIN, null, null, null);
+            // 将给定的节点指向头结点
             this.first = b;
             TreeNode<K,V> r = null;
+            /**
+             * 定义X节点 为 b 结点；next结点也为b结点
+             * next 节点初始化为头结点，用来控制遍历
+             */
             for (TreeNode<K,V> x = b, next; x != null; x = next) {
+                //指向下一结点
                 next = (TreeNode<K,V>)x.next;
+                //将x结点的连接属性清空
                 x.left = x.right = null;
                 if (r == null) {
+                    /**
+                     *  r 为null 说明是红黑树中没有结点
+                     *  x 结点就是红黑树的根结点
+                     *    根结点的父结点为null，颜色为黑色
+                     */
                     x.parent = null;
                     x.red = false;
                     r = x;
                 }
                 else {
+                    // 当前结点的关键字
                     K k = x.key;
+                    // 当前结点的hash值
                     int h = x.hash;
                     Class<?> kc = null;
                     for (TreeNode<K,V> p = r;;) {
+                        /**
+                         * 从红黑树的根结点开始遍历，查找当前结点对应的位置
+                         * dir 控制查找的方向
+                         * ph 记录当前结点的hash值
+                         */
                         int dir, ph;
                         K pk = p.key;
                         if ((ph = p.hash) > h)
+                            /**
+                             * 当前节点的hash值大于要插入结点的hash值，
+                             * 在当前结点的左子树中查找
+                             */
                             dir = -1;
                         else if (ph < h)
+                            /**
+                             * 当前节点的hash值小于要插入结点的hash值，
+                             * 在当前结点的右子树中查找
+                             */
                             dir = 1;
                         else if ((kc == null &&
                                   (kc = comparableClassFor(k)) == null) ||
                                  (dir = compareComparables(kc, k, pk)) == 0)
+                            /**
+                             * 如果hash值相等，则比较k值，用其Compare，
+                             * 如果还相等，则走tieBreakOrder方法
+                             */
                             dir = tieBreakOrder(k, pk);
+                            // 暂存当前节点
                             TreeNode<K,V> xp = p;
+                            
+                        /**
+                         * 根据dir控制查找方向
+                         */    
                         if ((p = (dir <= 0) ? p.left : p.right) == null) {
                             x.parent = xp;
                             if (dir <= 0)
                                 xp.left = x;
                             else
                                 xp.right = x;
+                            
+                            // 插入后平衡红黑树的性质
                             r = balanceInsertion(r, x);
                             break;
                         }
                     }
                 }
             }
+            //指定红黑树的根结点
             this.root = r;
             assert checkInvariants(root);
         }
         
         /**
-         *  左旋转过程
+         * 左旋转过程
          */
         static <K,V> TreeNode<K,V> rotateLeft(TreeNode<K,V> root,
                                               TreeNode<K,V> p) {
+            
             TreeNode<K,V> r, pp, rl;
+            /**
+             * 结点P不为null且p的右结点不为null 
+             */
             if (p != null && (r = p.right) != null) {
+                
                 if ((rl = p.right = r.left) != null)
+                    /**
+                     * p.right = r.left p的右结点为r的左结点
+                     * 然后将其赋值给rl
+                     * 当rl 不为空的时候，确定p与rl的关系：
+                     *   父结点与左子结点
+                     */
                     rl.parent = p;
+                
                 if ((pp = r.parent = p.parent) == null)
+                    /**
+                     * 结合 r = p.right
+                     *    r.parent = p.parent 将p的右子树链接到 p的父结点
+                     * 如果P的父结点为null，说明当前p结点为红黑树的根结点
+                     *    经过上述r.parent = p.parent 将红黑树的根节点转为r
+                     *      根结点为r结点，颜色尾黑色
+                     */
                     (root = r).red = false;
                 else if (pp.left == p)
+                    /**
+                     * 到这一步说明 p 结点不是红黑树的根结点
+                     * 且p为其父结点的左子树，
+                     * 将r替换原来P结点的位置(左旋转)
+                     */
                     pp.left = r;
                 else
+                    /**
+                     * 到这一步说明 p 结点不是红黑树的根结点
+                     * 且p为其父结点的右子树，
+                     * 将r替换原来P结点的位置(左旋转)
+                     */
                     pp.right = r;
+                    
+                /**
+                 * 上述过程只是完成了将原先以P 结点为红黑树子树
+                 * 的根结点，替换为以P的右结点为根结点的部分
+                 * 即 p.right = r.left 将原先r的左链接替换
+                 * 成 p的右链接的过程。
+                 */    
+                
+                //r的左结点为p
                 r.left = p;
+                // p的父结点为r节点
                 p.parent = r;
             }
             return root;
         }
 
         /**
-         *  右旋转 
+         *  右旋转 为上述左旋转的逆过程
          */
         static <K,V> TreeNode<K,V> rotateRight(TreeNode<K,V> root,
                                                TreeNode<K,V> p) {
@@ -400,8 +478,6 @@ static final class TreeBin<K,V> extends Node<K,V> {
                 * 当前结点的父结点(xp) 为 其父节点(xpp)的左孩子 
                 */
                 if (xp == (xppl = xpp.left)) {
-                   
-                    
                     if ((xppr = xpp.right) != null && xppr.red) {
                         /**
                          *  当前结点(x)得父结点(xp)的父结点(xpp)的右孩子(xppr)
@@ -443,21 +519,45 @@ static final class TreeBin<K,V> extends Node<K,V> {
                  * 当前结点的父结点(xp) 为 其父节点(xpp)的右孩子 
                  */
                 else {
-                    
+                    //xppl 为当前结点(x)的父结点(xp)的父结点(xpp)的左孩子
                     if (xppl != null && xppl.red) {
+                        /**
+                         *  xppl不为null 且是红结点
+                         *          xpp                   
+                         *         /  \
+                         *  red  xppl  xp red
+                         *                   ---> x结点在这一层
+                         *           | 变为
+                         *          xpp red  ---> 变换过后x结位置
+                         *          /  \
+                         * black xppl  xp black 
+                         *              
+                         */
                         xppl.red = false;
                         xp.red = false;
                         xpp.red = true;
+                        // 控制循环
                         x = xpp;
                     }
                     else {
+                        //如果左叔叔为空或者是黑色
                         if (x == xp.left) {
+                            //如果当前节点是个左孩子 右旋转                  
                             root = rotateRight(root, x = xp);
+                            //获取爷爷结点
                             xpp = (xp = x.parent) == null ? null : xp.parent;
                         }
                         if (xp != null) {
+                            /**
+                             * 父结点不为null 设置父结点为黑色 
+                             */
                             xp.red = false;
                             if (xpp != null) {
+                                /**
+                                 * 爷爷结点不为null
+                                 * 将其置为红色
+                                 * 对其进行左旋转
+                                 */
                                 xpp.red = true;
                                 root = rotateLeft(root, xpp);
                             }
@@ -468,90 +568,212 @@ static final class TreeBin<K,V> extends Node<K,V> {
         }
         
         /**
-         *  
+         * 红黑树中删除节点后会打破红黑树的性质需要平衡
+         * TreeNode<K,V> root 根结点
+         * TreeNode<K,V> x 要删除的节点
          */
         static <K,V> TreeNode<K,V> balanceDeletion(TreeNode<K,V> root,
                                                    TreeNode<K,V> x) {
             for (TreeNode<K,V> xp, xpl, xpr;;)  {
                 if (x == null || x == root)
+                    // x 为 null 或者 x 为根结点 无须平衡
                     return root;
                 else if ((xp = x.parent) == null) {
+                    /**
+                     *      xp null
+                     *       \
+                     *        ---> x 结点位置(可为左结点也可为右结点) 
+                     * 此时x 为红黑树的根结点
+                     */
                     x.red = false;
                     return x;
                 }
                 else if (x.red) {
+                     /**
+                      *      xp 
+                      *       \
+                      *        ---> x 结点位置(且为red)
+                      *  将其变为黑色结点
+                      */
                     x.red = false;
                     return root;
                 }
+                
                 else if ((xpl = xp.left) == x) {
+                    // x 为其父结点的左结点
                     if ((xpr = xp.right) != null && xpr.red) {
-                        xpr.red = false;
-                        xp.red = true;
+                        /**
+                         *      xp 
+                         *     / \
+                         *    x  xpr red
+                         *       / \
+                         *   xprl   xprr
+                         */
+                        xpr.red = false; // 将xpr置为黑色
+                        xp.red = true;   // 将xp置为红色
+                        // 左旋转 xp
                         root = rotateLeft(root, xp);
+                        /**
+                         *      xpr 
+                         *     / \
+                         *    xp  xprr
+                         *   / \
+                         *  x   xprl
+                         */
+                        // 获取 新的xpr
                         xpr = (xp = x.parent) == null ? null : xp.right;
                     }
+                    
                     if (xpr == null)
+                        // 控制循环
                         x = xp;
                     else {
+                        /**
+                         *      xpr 
+                         *     / \
+                         *    xp  xprr
+                         *   / \
+                         *  x   xprl
+                         *       / \
+                         *     sl  sr
+                         */
                         TreeNode<K,V> sl = xpr.left, sr = xpr.right;
                         if ((sr == null || !sr.red) &&
                             (sl == null || !sl.red)) {
+                            /**
+                             * 树中xpr(即上图的xprl) 的叶子结点不存在 或为黑色结点
+                             * 树中xpr(上图中的xprl) 置为红色
+                             * 将x 指向 xp 继续循环
+                             */
                             xpr.red = true;
                             x = xp;
                         }
                         else {
                             if (sr == null || !sr.red) {
+                                /**
+                                 *      xpr 
+                                 *     / \
+                                 *    xp  xprr
+                                 *   / \
+                                 *  x   xprl
+                                 *       / \
+                                 *         sr null || black
+                                 */
                                 if (sl != null)
+                                    // sl 不为null 将其置为黑色
                                     sl.red = false;
+                                // 树中的xpr(上图xprl)置为红色
                                 xpr.red = true;
+                                // 右旋转
                                 root = rotateRight(root, xpr);
+                                // 重新获取xp的右子树
                                 xpr = (xp = x.parent) == null ?
                                     null : xp.right;
                             }
                             if (xpr != null) {
+                                /**
+                                 * 重新获取的xpr 不为null
+                                 * xpr 的颜色与 父结点的颜色相同
+                                 */
                                 xpr.red = (xp == null) ? false : xp.red;
                                 if ((sr = xpr.right) != null)
-                                sr.red = false;
-                        }
-                        if (xp != null) {
-                            xp.red = false;
-                            root = rotateLeft(root, xp);
-                        }
-                        x = root;
+                                // 重新获取的xpr 的右节点不为null，将其置黑
+                                sr.red = false; 
+                            }
+                            if (xp != null) {
+                                /**
+                                 * xp 不为null 
+                                 * 将xp置为红色
+                                 * 左旋转xp
+                                 */
+                                xp.red = false;
+                                root = rotateLeft(root, xp);
+                            }
+                            x = root;
                     }
                 }
             }
-            else { // symmetric
+            else { // x 为其父结点的右结点
                 if (xpl != null && xpl.red) {
+                    /**
+                     *      xp 
+                     *     / \
+                     *  xpl   x
+                     *       / \
+                     *      
+                     */
                     xpl.red = false;
                     xp.red = true;
+                    /**
+                     *        xp            xpl
+                     *       / \            / \
+                     *     xpl   x  ==>  xpll  xp   
+                     *    / \   / \           /  \
+                     * xpll xplr           xplr  x
+                     */
                     root = rotateRight(root, xp);
+                    /**
+                     * 重新获取xpl
+                     *          xpl
+                     *          / \
+                     *       xpll  xp   
+                     *            /  \
+                     *          xplr  x
+                     *           |__ 新的xpl指向这里
+                     */
                     xpl = (xp = x.parent) == null ? null : xp.left;
                 }
                 if (xpl == null)
+                    // 新的xpl为null x 指向器父结点
                     x = xp;
                 else {
+                    // 获取xpl的左结点与右结点
                     TreeNode<K,V> sl = xpl.left, sr = xpl.right;
                     if ((sl == null || !sl.red) &&
                         (sr == null || !sr.red)) {
+                        /**
+                         * 左子结点 为空或 为黑色
+                         * 且
+                         * 右子结点 为空或 为黑色
+                         * 
+                         * 将 xpl 置为红色
+                         */
                         xpl.red = true;
+                        // 控制循环
                         x = xp;
                     }
                     else {
                         if (sl == null || !sl.red) {
+                            /**
+                             *        xp 
+                             *       / \
+                             *    xpl   x
+                             *    / \  / \
+                             *  sl(null || black)
+                             */
                             if (sr != null)
+                                // 如果sr不为null 设置为黑色
                                 sr.red = false;
+                            //xpl置为红色
                             xpl.red = true;
+                            //左旋转xpl
                             root = rotateLeft(root, xpl);
+                            //重新获取xpl
                             xpl = (xp = x.parent) == null ?
                                 null : xp.left;
                         }
                         if (xpl != null) {
+                            // xpl 不为null xpl的颜色与xp的颜色相同
                             xpl.red = (xp == null) ? false : xp.red;
                             if ((sl = xpl.left) != null)
                                 sl.red = false;
                         }
                         if (xp != null) {
+                            /**
+                             * xp不为null
+                             * xp为黑色
+                             * 右旋转xp
+                             */
                             xp.red = false;
                             root = rotateRight(root, xp);
                         }
@@ -561,14 +783,6 @@ static final class TreeBin<K,V> extends Node<K,V> {
             }
         }
     }
-
-    
 }
 ```
-
-
-
-
-
-
  [点击了解红黑树]:https://mp.weixin.qq.com/s/FzNbESz6FWdCayVyRD3YFA
