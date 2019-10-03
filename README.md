@@ -365,6 +365,8 @@ RabbitMQ消息流转
 
 * [RabbitMq消息发送模式]
 
+* [RabbitMq 问题]
+
 
 
 
@@ -396,7 +398,7 @@ RabbitMQ消息流转
  [RabbitMq的一些核心概念]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_Exchange.md
  [RabbitMq高级特性]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_1.md
  [RabbitMq集群架构模式]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_2.md
- 
  [RabbitMq消息发送模式]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_3.md
+ [RabbitMq 问题]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_4.md
  
  

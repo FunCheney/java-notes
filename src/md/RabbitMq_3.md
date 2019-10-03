@@ -8,6 +8,7 @@
 &ensp;&ensp;调用RabbitMq的covertAndSend()方法即可。
 
 ### 确认消息发送
+[消息可靠性投递解决方案]
 
 ### 批量消息发送
 
@@ -15,7 +16,44 @@
 
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/rabbitMq_Batch_Send.jpg "批量发送")
 
+* step1业务入库
+
+* 批量发送，批量发送组件中包含SessionId，ThreadLocal，MessageHoder；一批消息共用一个sessionId。然后将这一批消息放到ThreadLocal中。MessageHoder可能是一个List集合，承装这一批消息，装到规定数量之后，进行消息入库(记录相关sessionId的消息)。如果要做可靠性投递，则数据落库；反之则不需要。
+
+* step3 消息投递
+
+* step4 消息确认
+
+* step5 修改状态
+
+后面的步奏就与可靠性投递类似。
+
+对于Consumer
+
+&ensp;&ensp;接收到消息之后，根据类型(批量)进行拆分。根据size获取这一批消息有几条记录，然后组成一个原子性操作即可。
 
 
 ### 延迟发送
 &ensp;&ensp;延迟消息在Message封装时添加delayTime属性即可。
+
+### 顺序发送
+* 1.发送的顺序消息，必须保障消息投递到同一个队列，且消费者只能有一个。
+
+* 2.需要统一提交(可能是合并成一个大消息，也肯能拆分成多个消息)，并且所有消息的会话ID一致。
+
+* 3.添加消息属性：顺序标记的序号，和本次顺序消息的size属性，进行落库操作
+
+* 4.并行进行发送给自身的延迟消息(注意带上关键属性：会话ID，size)进行后续处理消费
+
+* 5.当收到延迟消息后，根据会话ID，size抽取数据库数据进行处理(顺序消息的消费不是即时消费的，有一个延迟投递的过程)。
+
+* 6.定时轮询补偿机制，处理异常情况
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/rabbitmq_order_msg.jpg "顺序消息")
+
+### 消息的幂等性
+
+
+
+
+[消息可靠性投递解决方案]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_1.md#消息如何保障100的投递成功
