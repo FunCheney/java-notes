@@ -74,7 +74,12 @@
 
 * 2.创建线程
 * 3.[线程的状态及状态之间转换]
-* 4.[线程间通信]
+* 4.线程间通信
+   
+   &ensp;&ensp;&ensp;&ensp;a.[wait_notify]
+   
+   &ensp;&ensp;&ensp;&ensp;b.[join]
+   
 * 5.线程池
 
 ## :eyes:  7. 线程安全
@@ -339,7 +344,7 @@ Queue相关
 [Java内存模型]:https://mp.weixin.qq.com/s/et8fuuCSDZ19nYlssqWqEQ
 [多线程下的单例模式_01]:https://mp.weixin.qq.com/s/57B7I7zjruOPN_8YVUP4LA
 [多线程下的单例模式_02]:https://mp.weixin.qq.com/s/UQPR42fAPB3UfNwvto7MuA
-[线程间通信]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/example/waitnotify/wait_notify.md
+[wait_notify]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/example/waitnotify/wait_notify.md
 [线程的状态及状态之间转换]:https://github.com/FunCheney/concurrency/blob/master/src/md/ThreadSafe.md#computer1-线程的生命周期
  
  
