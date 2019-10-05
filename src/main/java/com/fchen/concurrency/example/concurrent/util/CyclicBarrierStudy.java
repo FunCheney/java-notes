@@ -1,8 +1,10 @@
-package com.fchen.concurrency.example.aqs;
+package com.fchen.concurrency.example.concurrent.util;
 
 import lombok.extern.slf4j.Slf4j;
+import sun.rmi.runtime.Log;
 
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -13,12 +15,9 @@ import java.util.concurrent.Executors;
  * @Author by Chen
  */
 @Slf4j
-public class CyclicBarrierStudy2 {
+public class CyclicBarrierStudy {
     //给定一个值，确定当前有多少个线程同步等待
-    //这里如果实现了Runnable接口，则Runnable先执行
-    private  static CyclicBarrier barrier = new CyclicBarrier(5,()->{
-        log.info("callback is running");
-    });
+    private  static CyclicBarrier barrier = new CyclicBarrier(5);
     public static void main(String[] args) throws Exception{
         ExecutorService executor = Executors.newCachedThreadPool();
 

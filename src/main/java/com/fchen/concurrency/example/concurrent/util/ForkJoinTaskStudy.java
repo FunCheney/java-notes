@@ -1,4 +1,4 @@
-package com.fchen.concurrency.example.aqs;
+package com.fchen.concurrency.example.concurrent.util;
 
 /**
  * @Classname ForkJoinTaskStudy
