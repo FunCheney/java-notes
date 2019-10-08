@@ -1,6 +1,6 @@
 ## Exchange
 
-Exchange：接收消息，并更具路由键转发消息所绑定的队列
+Exchange：接收消息，并根据路由键转发消息所绑定的队列
 
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/rabbitmq_1_exchange.jpg "消息流转")
 
