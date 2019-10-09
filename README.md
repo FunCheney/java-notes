@@ -291,7 +291,8 @@ J.U.C 中源码相关阅读笔记
 
 Queue相关
 
-
+### 线程池
+* [初识线程池]
 
 
 
@@ -354,7 +355,7 @@ Queue相关
 [多线程下的单例模式_02]:https://mp.weixin.qq.com/s/UQPR42fAPB3UfNwvto7MuA
 [wait_notify]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/example/waitnotify/wait_notify.md
 [线程的状态及状态之间转换]:https://github.com/FunCheney/concurrency/blob/master/src/md/ThreadSafe.md#computer1-线程的生命周期
- 
+[初识线程池]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ThreadPoolExecutor.md
  
  [AMQP]:https://github.com/FunCheney/concurrency/blob/master/src/md/AQMP.md
  [RabbitMQ]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_0.md
