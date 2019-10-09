@@ -276,7 +276,7 @@ private final Node<K,V>[] initTable() {
     return tab;
 }
 ```  
-&ensp;&ensp;通过上述代码的学习，发现ConcurrentHashMap在初始化的时候只允许一个线程对其初始化
+&ensp;&ensp;通过上述代码的学习，发现ConcurrentHashMap在初始化的时候只允许一个线程对其初始化。
 
 #### helpTransfer()方法
 &ensp;&ensp;在上述的putVal()方法中，有一段代码提到结点类型为ForwardingNode的时候会调用扩容方法，下面在调用扩容方法之前，先来学习一下ForwardingNode;
@@ -302,11 +302,17 @@ static final class ForwardingNode<K,V> extends Node<K,V> {
 ```
 final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
     Node<K,V>[] nextTab; int sc;
+    /**
+     * 验证是否需要扩容
+     * 原先的容器不为null，
+     * 当前结点的类型为ForwardingNode，
+     * 当前节点指向的nextTable 不为null
+     */
     if (tab != null && (f instanceof ForwardingNode) &&
         (nextTab = ((ForwardingNode<K,V>)f).nextTable) != null) {
         int rs = resizeStamp(tab.length);
         while (nextTab == nextTable && table == tab &&
-               (sc = sizeCtl) < 0) {
+               (sc = sizeCtl) < 0) { //sizeCtl小于0 扩容状态
             if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
                 sc == rs + MAX_RESIZERS || transferIndex <= 0)
                 break;
@@ -320,6 +326,7 @@ final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
     return table;
 }
 ```
+
 ##### transfer()方法
 ```java
 private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
