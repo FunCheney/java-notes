@@ -118,6 +118,11 @@
 * 3.无同步方案
 
 &ensp;&ensp;在不涉及到操作共享数据的情况下，这样的代码就是线程安全的。不需要在通过同步措施来保证正确性。
+
+&ensp;&ensp;使用线程局部变量[ThreadLocal]
+
+
+
 ## :pencil2:  8. 可见性、有序性、原子性
 #### :memo: 原子性
 
@@ -334,7 +339,7 @@ Queue相关
 
 
 ### RPC
-
+[ThreadLocal]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ThreadLocal.md
 [ConcurrentHashMap]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
 
 [Condition实现原理及源码分析]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/Condition2.md
