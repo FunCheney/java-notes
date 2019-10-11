@@ -24,15 +24,15 @@ workQueue：
 
  &ensp;&ensp;当提交一个新的任务到线程池以后，线程池会根据当前线程池中的正在运行着的线程数量提决定该任务的理方式。处理方式有如下几种
  
- *1.直接切换
+ * 1.直接切换
    
      使用SynchronousQueue
  
- *2.使用有界队列
+ * 2.使用有界队列
  
      使用ArrayBlockingQueue 使用这种方式可以将线程池的最大线程数量限制为maximumPoolSize，这样能够降低资源的消耗，这种方式使得线程池对线程的调度变得更加困难，因为线程数和任务存储量都是有限的了。
  
- *3.使用无界队列
+ * 3.使用无界队列
  
     使用基于链表的阻塞队列 LinkedBlockingDeque；使用这种方式线程池中能够创建的最大线程数就是corePoolSize；maximumPoolSize就不会起作用了。
     
