@@ -105,21 +105,21 @@
 
 &ensp;&ensp;互斥是实现同步的一种手段，临界区、互斥量和信号量都是主要的互斥实现方式。
 
-   &ensp;&ensp;1）. synchronize 是实现互斥的主要手段。
+   &ensp;&ensp;1). synchronize 是实现互斥的主要手段。
 
-   &ensp;&ensp;2）. ReentrantLocak 实现同步。
+   &ensp;&ensp;2). ReentrantLocak 实现同步。
 
 * 2.非阻塞同步
 
 &ensp;&ensp;基于冲突检测的乐观并发策略。就是先进行操作，如果没有其他线程争用共享数据，那操作就成功了；如果有共享数据的争用，产生了冲突，在采取其他的补偿措施(最常见的补偿措施就是不断重试，知道成功为止)，这种乐观的并发策略的许多实现都不需要把线程挂起，因此这种操作称为非阻塞同步(Non-Blocking Synchronization).
 
-&ensp;&ensp;1）. CAS
+&ensp;&ensp;1). CAS
 
 * 3.无同步方案
 
-&ensp;&ensp;在不涉及到操作共享数据的情况下，这样的代码就是线程安全的。不需要在通过同步措施来保证正确性。
+&ensp;&ensp;1).在不涉及到操作共享数据的情况下，这样的代码就是线程安全的。不需要在通过同步措施来保证正确性。
 
-&ensp;&ensp;使用线程局部变量[ThreadLocal]
+&ensp;&ensp;2).使用线程局部变量[ThreadLocal]
 
 
 
@@ -156,6 +156,7 @@ J.U.C 中相关类
 
 ### locks包下面
 * AQS
+
 &ensp;&ensp;&ensp;&ensp;1.[初识AQS]
     
 &ensp;&ensp;&ensp;&ensp;2.[AQS]
@@ -234,7 +235,7 @@ Queue相关
 [ReentrantReadWriteLock的源码学习之同步容器的实现]:https://mp.weixin.qq.com/s/A6d940S3InLynoOqkvknJw
 [ReentrantReadWriteLock的源码学习之实现]:https://mp.weixin.qq.com/s/TGhnvw_70etoG9nGn0LDUw
 [ReentrantLock]:https://mp.weixin.qq.com/s/qInMguens_3Vun0YxGGYOA
-[初识AQS]::https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/AQS_介绍.md
+[初识AQS]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/AQS_介绍.md
 [AQS]:https://mp.weixin.qq.com/s/7meggIhX8waD5DsMGizs0Q
 [并发编程中锁的分类总结]:https://mp.weixin.qq.com/s/vYuadfkQJytuPgNees16cQ
 [volatile关键字_01]:https://mp.weixin.qq.com/s/DFdImZ1srF-6OI_8ilRi8A
