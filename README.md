@@ -206,7 +206,6 @@ Queue相关
 
 
 
-
 ### 队列
 
 * [AMQP]
@@ -230,6 +229,12 @@ Queue相关
 
 
 ## :tiger2: 进击JVM
+
+### 内存结构
+
+### 垃圾回收机制
+
+
 [ThreadLocal]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ThreadLocal.md
 [ConcurrentHashMap]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
 
