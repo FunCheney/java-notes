@@ -5,7 +5,7 @@
 ### 构造方法
 
 #### 无参构造方法
-```
+```java
 /**
  *  创建一个新的，空的Map;默认的初始表大小（16）。
  */
@@ -13,7 +13,7 @@ public ConcurrentHashMap() {
 }
 ```
 #### 带有初始容量的构造方法
-```
+```java
 /**
  * 创建一个Map，其初始表格大小适应指定数量的元素，而不需要动态调整大小。
  */
@@ -37,7 +37,7 @@ public ConcurrentHashMap(int initialCapacity) {
  }
 ```
 #### 通过给定的Map创建相同映射的并发Map
-```
+```java
 public ConcurrentHashMap(Map<? extends K, ? extends V> m) {
     this.sizeCtl = DEFAULT_CAPACITY;
     //putAll()方法后面见
@@ -45,14 +45,14 @@ public ConcurrentHashMap(Map<? extends K, ? extends V> m) {
 }
 ```
 #### 根据给定的元素数量（ initialCapacity ）和初始表密度（ loadFactor ）创建
-```
+```java
 public ConcurrentHashMap(int initialCapacity, float loadFactor) {
     this(initialCapacity, loadFactor, 1);
 }
 ```
 &ensp;&ensp;上述代码中，调用this(initialCapacity, loadFactor, 1)方法，对于该构造方法的解释如下。
 
-```
+```java
 public ConcurrentHashMap(int initialCapacity,
                          float loadFactor, int concurrencyLevel) {
     //参数判断，非法参数抛出异常
@@ -73,7 +73,7 @@ public ConcurrentHashMap(int initialCapacity,
 &ensp;&ensp;在上面的构造方法中有几个构造方法都调用到tableSizeFor()方法。该方法的主要作用是：**大于输入参数且最近的2的整数次幂的数。**
 
 &ensp;&ensp;下面就来看看该方法的具体实现：
-```
+```java
 private static final int tableSizeFor(int c) {
     /**
      * 在使用位运算之前减1是必要的，
@@ -101,7 +101,7 @@ private static final int tableSizeFor(int c) {
 ## ConcurrentHashMap的操作
 
 ### put()方法
-```
+```java
 public V put(K key, V value) {
     return putVal(key, value, false);
 }
@@ -109,7 +109,7 @@ public V put(K key, V value) {
 &ensp;&ensp;将指定的键映射到此表中的指定值,调用putVal(key, value, false);
 
 #### putVal()方法
-```
+```java
 final V putVal(K key, V value, boolean onlyIfAbsent) {
     /**
      * 键或值中有一个为null，抛出异常
@@ -237,7 +237,7 @@ final V putVal(K key, V value, boolean onlyIfAbsent) {
 
 #### initTable()方法
 &ensp;&ensp;通过上面的构造方法可以看出，在调用ConcurrentHashMap的构造方法时，只是指定其初始化时的容量大小，并没有对Hash表(transient volatile Node<K,V>[] table)进行初始化，在上篇文章中提到table的初始化时懒加载方式初始化的，在这里可以更明确的看到。Hash表的初始化时在第一次插入元素的时候完成的。
-```
+```java
 private final Node<K,V>[] initTable() {
     Node<K,V>[] tab; int sc;
     // Hash表的数据容器为空或者长度为0 才会进入该方法
@@ -299,7 +299,7 @@ static final class ForwardingNode<K,V> extends Node<K,V> {
 
 &ensp;&ensp;上面对ForwardingNode结点类有了一定的了解之后，再来看看helpTransfer()方法的实现。
 
-```
+```java
 final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
     Node<K,V>[] nextTab; int sc;
     /**
@@ -343,7 +343,7 @@ static final int resizeStamp(int n) {
 }
 ```
 **返回int类型32位补码值最左边出现的1之前的0的个数，如果是0因为没有1，就返回32。**
-```
+```java
 public static int numberOfLeadingZeros(int i) {
     // HD, Figure 5-6
     if (i == 0)
@@ -507,7 +507,7 @@ private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
 ```
 
 #### putTreeVal()方法
-```
+```java
 final TreeNode<K,V> putTreeVal(int h, K k, V v) {
     Class<?> kc = null;
     boolean searched = false;
