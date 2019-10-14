@@ -310,14 +310,25 @@ final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
      */
     if (tab != null && (f instanceof ForwardingNode) &&
         (nextTab = ((ForwardingNode<K,V>)f).nextTable) != null) {
+        // 根据 length 得到一个标识符号
         int rs = resizeStamp(tab.length);
         while (nextTab == nextTable && table == tab &&
                (sc = sizeCtl) < 0) { //sizeCtl小于0 扩容状态
+              /**                
+                * 如果 sizeCtl 无符号右移  16 不等于 rs （ sc前 16 位如果不等于标识符，则标识符变化了）
+                * 或者 sizeCtl == rs + 1  （扩容结束了，不再有线程进行扩容）（默认第一个线程设置 sc ==rs 左移 16 位 + 2，当第一个线程结束扩容了，就会将 sc 减一。这个时候，sc 就等于 rs + 1）
+                * 或者 sizeCtl == rs + 65535  （如果达到最大帮助线程的数量，即 65535）
+                * 或者转移下标正在调整 （扩容结束）
+                * 结束循环，返回 table
+                */ 
             if ((sc >>> RESIZE_STAMP_SHIFT) != rs || sc == rs + 1 ||
                 sc == rs + MAX_RESIZERS || transferIndex <= 0)
                 break;
+            // 如果以上都不是, 将 sizeCtl + 1, （表示增加了一个线程帮助其扩容）
             if (U.compareAndSwapInt(this, SIZECTL, sc, sc + 1)) {
+                // 进行转移
                 transfer(tab, nextTab);
+                // 结束循环
                 break;
             }
         }
@@ -326,29 +337,61 @@ final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
     return table;
 }
 ```
+```
+static final int resizeStamp(int n) {
+    return Integer.numberOfLeadingZeros(n) | (1 << (RESIZE_STAMP_BITS - 1));
+}
+```
+**返回int类型32位补码值最左边出现的1之前的0的个数，如果是0因为没有1，就返回32。**
+```
+public static int numberOfLeadingZeros(int i) {
+    // HD, Figure 5-6
+    if (i == 0)
+        return 32;
+    int n = 1;           
+    if (i >>> 16 == 0) { n += 16; i <<= 16; }
+    if (i >>> 24 == 0) { n +=  8; i <<=  8; }
+    if (i >>> 28 == 0) { n +=  4; i <<=  4; }
+    if (i >>> 30 == 0) { n +=  2; i <<=  2; }
+    n -= i >>> 31;
+    return n;
+}
+```
 
 ##### transfer()方法
-```java
+```
 private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
     int n = tab.length, stride;
+    /**
+     * 将 length / 8 然后除以 CPU核心数。如果得到的结果小于 16，那么就使用 16。
+     * 这里的目的是让一个 CPU（一个线程）处理 16 个桶,多线程处理，转移每个桶中的数据
+     */
     if ((stride = (NCPU > 1) ? (n >>> 3) / NCPU : n) < MIN_TRANSFER_STRIDE)
         stride = MIN_TRANSFER_STRIDE; // subdivide range
     if (nextTab == null) {            // initiating
         try {
             @SuppressWarnings("unchecked")
+            // 新容器的数量为原容器数量的一倍，2的整数次幂
             Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n << 1];
+            // 更新
             nextTab = nt;
         } catch (Throwable ex) {      // try to cope with OOME
+            // 初始化失败，sizeCtl 使用 int 最大值
             sizeCtl = Integer.MAX_VALUE;
             return;
         }
+        // 更新成员变量
         nextTable = nextTab;
+        
         transferIndex = n;
     }
+    // 新表的长度
     int nextn = nextTab.length;
+    // 创建ForwardingNode结点，其他线程发现是该类型结点不操作
     ForwardingNode<K,V> fwd = new ForwardingNode<K,V>(nextTab);
     boolean advance = true;
     boolean finishing = false; // to ensure sweep before committing nextTab
+    // i 表示下标，bound 表示当前线程可以处理的当前桶区间最小下标
     for (int i = 0, bound = 0;;) {
         Node<K,V> f; int fh;
         while (advance) {
@@ -462,9 +505,9 @@ private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
     }
 }
 ```
-#### putTreeVal()方法
 
-```java
+#### putTreeVal()方法
+```
 final TreeNode<K,V> putTreeVal(int h, K k, V v) {
     Class<?> kc = null;
     boolean searched = false;
@@ -524,7 +567,7 @@ final TreeNode<K,V> putTreeVal(int h, K k, V v) {
 ```
 #### treeifyBin() 链表转红黑树
 
-```java
+```
 private final void treeifyBin(Node<K,V>[] tab, int index) {
     Node<K,V> b; int n, sc;
     if (tab != null) {
@@ -555,7 +598,7 @@ private final void treeifyBin(Node<K,V>[] tab, int index) {
 
 ### get()方法
 
-```java
+```
 public V get(Object key) {
     Node<K,V>[] tab; Node<K,V> e, p; int n, eh; K ek;
     int h = spread(key.hashCode());
@@ -589,5 +632,9 @@ static final int spread(int h) {
 ### 一些思考
 
 **负载因子为什么是0.75而不是其他值？**
+
+&ensp;&ensp;0.75是一个浮点类型的值，我们知道在计算机中数据存储是愕然禁止存储的，浮点类型的数据保存是存在精度问题的。所以在ConcurrentHashMap的操作中，阈值的计算采用**n - (n >>> 2)**公式计算。当容器中的数据个数大于这个数时就会扩容。n - (n >>> 2) = (1- 1/4)n = 3n / 4 = 0.75n;
+
+&ensp;&ensp;还有一点，为什么是0.75，而不是0.5或者1。个人认为不是0.5是为了避免扩容时，容器里面的数量太小。因为，如果是初始容量的0.5就扩容，那么扩完容之后，已有的容量为新容量的1/4,这时在重新reHash。1是避免容器中的数据满时在进行扩容。
 
 **链表转红黑树的阈值为什么是8？**
