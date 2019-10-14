@@ -174,8 +174,9 @@ J.U.C 中相关类
 &ensp;&ensp;&ensp;&ensp; 2. [Condition实现原理及源码分析] 
    
 ### Java并发容器和框架
-* [ConcurrentHashMap]
-* ConcurrentLinkedQueue
+* ConcurrentHashMap
+&ensp;&ensp;&ensp;&ensp; 1. [ConcurrentHashMap与红黑树]
+* ConcurrentLinkedQueue; 2. [ConcurrentHashMap的APi源码是实现与分析]
 * 阻塞队列
 ### atomic包下面
 * AtomicInteger
@@ -236,7 +237,9 @@ Queue相关
 
 
 [ThreadLocal]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ThreadLocal.md
-[ConcurrentHashMap]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
+[ConcurrentHashMap与红黑树]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
+
+[ConcurrentHashMap的APi源码是实现与分析]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap_1.md
 
 [Condition实现原理及源码分析]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/Condition2.md
 [Condition使用示例]:https://mp.weixin.qq.com/s/3LBExINGMipnBaKj27eRSA
