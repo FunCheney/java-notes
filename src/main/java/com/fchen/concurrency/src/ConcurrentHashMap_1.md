@@ -337,7 +337,7 @@ final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
     return table;
 }
 ```
-```
+```java
 static final int resizeStamp(int n) {
     return Integer.numberOfLeadingZeros(n) | (1 << (RESIZE_STAMP_BITS - 1));
 }
@@ -359,7 +359,7 @@ public static int numberOfLeadingZeros(int i) {
 ```
 
 ##### transfer()方法
-```
+```java
 private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
     int n = tab.length, stride;
     /**
@@ -567,7 +567,7 @@ final TreeNode<K,V> putTreeVal(int h, K k, V v) {
 ```
 #### treeifyBin() 链表转红黑树
 
-```
+```java
 private final void treeifyBin(Node<K,V>[] tab, int index) {
     Node<K,V> b; int n, sc;
     if (tab != null) {
@@ -598,7 +598,7 @@ private final void treeifyBin(Node<K,V>[] tab, int index) {
 
 ### get()方法
 
-```
+```java
 public V get(Object key) {
     Node<K,V>[] tab; Node<K,V> e, p; int n, eh; K ek;
     int h = spread(key.hashCode());
@@ -623,7 +623,7 @@ public V get(Object key) {
 ### 其他方法
 
 #### spread()方法
-```
+```java
 static final int spread(int h) {
     return (h ^ (h >>> 16)) & HASH_BITS;
 }
