@@ -241,6 +241,8 @@ Queue相关
 ### 垃圾回收机制
 
 
+
+[Disruptor介绍及示例]:https://github.com/FunCheney/concurrency/blob/master/src/md/disruptor/Disruptor_0.md
 [ThreadLocal]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ThreadLocal.md
 [ConcurrentHashMap与红黑树]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
 
