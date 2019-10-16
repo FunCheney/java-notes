@@ -240,13 +240,13 @@ Queue相关
 * 生产过程中，遇到问题要分析解决。。。
 * Java进阶必备。。。
 ### JVM基础知识
-
+[初始JVM]
 ### 内存结构
 
 ### 垃圾回收机制
 
 
-
+[初始JVM]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_0.md
 [Disruptor介绍及示例]:https://github.com/FunCheney/concurrency/blob/master/src/md/disruptor/Disruptor_0.md
 [ThreadLocal]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ThreadLocal.md
 [ConcurrentHashMap与红黑树]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
