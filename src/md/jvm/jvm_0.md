@@ -15,12 +15,23 @@
  
  &ensp;&ensp;Java语言采用编译 + 解释来执行的。
  
- ** 为什么使用JVM：**
+ 
+** 为什么使用JVM：**
+
 
 ### JVM启动流程
-
-
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.jpg "JVM启动流程")
+
+&ensp;&ensp;JVM的启动是由Java命令来启动的，java命令会跟上一个启动类，启动类中会有main()方法。
+
+* step1: 装载配置，根据当前路径和系统版本寻找JVM的配置文件；
+
+* step2: 找到配置文件之后，会找JVM.dll文件，这个文件是JVM主要实现
+
+* step3: 找到匹配当前系统版本的dll文件之后，会初始化先关的虚拟机。
+
+* step4: 找到main方法，启动类。
+
 ### JVM基本结构
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84.jpg "JVM基本结构")
 
@@ -41,7 +52,7 @@
   
 * java堆
 
-&ensp;&ensp;全局共享
+&ensp;&ensp;Java对是全局共享的，所有线程都可以访问
 
 * java栈
   

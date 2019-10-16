@@ -201,18 +201,18 @@ Queue相关
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/Image/way.jpg "处理方式与手段")
 
 
-### 缓存
+## 缓存
 
 缓存的作用？什么是缓存？
 
 #### redis
 
-*[Redis介绍]
+* [Redis介绍]
+
+* [Redis问题总结]
 
 
-
-
-### 队列
+## 队列
 
 * [AMQP]
 
@@ -231,7 +231,7 @@ Queue相关
 ### Disruptor
 * [Disruptor介绍及示例]
 
-### RPC
+## RPC
 
 
 ## :tiger2: 进击JVM
@@ -282,4 +282,6 @@ Queue相关
  [RabbitMq消息发送模式]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_3.md
  [RabbitMq 问题]:https://github.com/FunCheney/concurrency/blob/master/src/md/RabbitMq_4.md
  
+ [Redis介绍]:https://github.com/FunCheney/concurrency/blob/master/src/md/redis/redis_1.md
+ [Redis问题总结]:https://github.com/FunCheney/concurrency/blob/master/src/md/redis/redis_2.md
  
