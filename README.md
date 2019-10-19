@@ -243,6 +243,9 @@ Queue相关
 [初始JVM]
 ### 内存结构
 
+![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM.jpg "JVMn内存")
+
+[各个模块的用途]
 ### 垃圾回收机制
 
 
