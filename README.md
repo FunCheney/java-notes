@@ -240,18 +240,23 @@ Queue相关
 * 生产过程中，遇到问题要分析解决。。。
 * Java进阶必备。。。
 ### JVM基础知识
-[初始JVM]
+* [初始JVM]
 ### 内存结构
 &ensp;&ensp;Java虚拟机在执行Java程序的过程中会把它所管理的内存区域划分为若干个不同的数据区域。这些区域有各自的用途，以及创建和销毁时间，有的区域随着虚拟机进程的启动而存在，有些区域则依赖用户线程的启动和结束而建立和销毁。
 
 ![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM.jpg "JVM内存")
 
-[各个模块的用途]
+* [各个模块的用途]
 ### 垃圾回收机制
+* [JVM的gc概述]
 
+* [几种垃圾回收机制]
 
 [初始JVM]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_0.md
 [各个模块的用途]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_1.md
+[JVM的gc概述]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_2.md
+[JVM的gc概述]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_3.md
+
 [Disruptor介绍及示例]:https://github.com/FunCheney/concurrency/blob/master/src/md/disruptor/Disruptor_0.md
 [ThreadLocal]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ThreadLocal.md
 [ConcurrentHashMap与红黑树]:https://github.com/FunCheney/concurrency/blob/master/src/main/java/com/fchen/concurrency/src/ConcurrentHashMap.md
