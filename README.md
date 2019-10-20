@@ -244,7 +244,7 @@ Queue相关
 ### 内存结构
 &ensp;&ensp;Java虚拟机在执行Java程序的过程中会把它所管理的内存区域划分为若干个不同的数据区域。这些区域有各自的用途，以及创建和销毁时间，有的区域随着虚拟机进程的启动而存在，有些区域则依赖用户线程的启动和结束而建立和销毁。
 
-![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM.jpg "JVMn内存")
+![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM.jpg "JVM内存")
 
 [各个模块的用途]
 ### 垃圾回收机制
