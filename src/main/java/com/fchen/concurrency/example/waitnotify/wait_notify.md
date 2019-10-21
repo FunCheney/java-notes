@@ -21,9 +21,10 @@
 &ensp;&ensp;最后，等待通知机制的实现方式可以归纳出如下金典范式，该范式分为两部分，分别针对等待方(消费者)和通知方(生产者)
 
 * 等待方遵循原则如下：
+
 &ensp;&ensp;1) 获取对象的锁
 
-&ensp;&ensp;2) 如果条件不满足，那么调用对象的wait()方法，被通知后扔要检查套件
+&ensp;&ensp;2) 如果条件不满足，那么调用对象的wait()方法，被通知后扔要检查条件
 
 &ensp;&ensp;3) 条件满足则执行对应的逻辑
 
@@ -68,9 +69,74 @@ synchronized(对象){
 notify()或者notifyAll()方法，线程A收到对象通知后从对象O的wait()方法返回，进而执行后续的操作。
 
 
-### 面试题总结
+## 面试题总结
 
-**交替打印数组与字符串。**
+**1.交替打印数组与字符串**
+```java
+@Slf4j
+public class PrintTest {
+    static boolean flag = true;
+    static Object lock = new Object();
+
+    public static void main(String[] args) throws Exception{
+        Thread waitThread = new Thread(new PrintTest.Wait(),"WaitThread");
+        waitThread.start();
+        Thread notifyThread = new Thread(new PrintTest.Notify(), "NotifyThread");
+        notifyThread.start();
+    }
+    static class Wait implements Runnable{
+        @Override
+        public void run() {
+            // 加锁，拥有lock的Monitor
+            String num = "123456789";
+            synchronized (lock){
+                // 当条件不满足时，继续wait，同时释放lock锁
+                try {
+                    for (int i = 0; i < num.length(); ){
+                        if(flag){
+                            System.out.println(num.charAt(i));
+                            flag = false;
+                            i++;
+                            lock.notify();
+                        }else {
+                            lock.wait();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    static class Notify implements Runnable{
+        @Override
+        public void run() {
+            //加锁，拥有lock的Monitor
+            String str = "abcdefgh";
+            try {
+                synchronized (lock){
+                    // 获取当前lock锁，然后进行通知，通知时不会释放lock锁
+                    // 知道当前线程释放了lock后，WaitThread才能从Wait方法中返回
+
+                    for (int i = 0; i < str.length();){
+                        if(!flag){
+                            System.out.println(str.charAt(i));
+                            flag = true;
+                            i++;
+                            lock.notify();
+                        }else {
+                            lock.wait();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
 
 
 
