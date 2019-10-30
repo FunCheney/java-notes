@@ -25,7 +25,11 @@
  
  * 如果使用句柄访问的话，那么Java堆中将会划分一块内存来作为句柄池，reference中存储的就是对象句柄的地址，而句柄中包含了对象实例数据与类型数据各自的具体地址信息。
  
+ ![image]( https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM%E4%B8%AD%E9%80%9A%E8%BF%87%E5%8F%A5%E6%9F%84%E8%AE%BF%E9%97%AE%E5%AF%B9%E8%B1%A1.jpg "JVM对象访问之句柄访问")
+
  * 如果使用直接指针访问，那么Java堆对象的布局中就必须考虑如何放置访问类型数据的相关信息，而reference中存储的直接就是对象地址。
+ 
+  ![image]( https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM%E4%B8%AD%E9%80%9A%E8%BF%87%E7%9B%B4%E6%8E%A5%E6%8C%87%E9%92%88%E8%AE%BF%E9%97%AE%E5%AF%B9%E8%B1%A1.jpg "JVM对象访问之直接指针访问")
  
  
 &ensp;&ensp;这两种访问方式各有优势，使用句柄来访问的最大好处就是reference中存储的是稳定的句柄地址，在对象呗移动(垃圾收集时移动对象是非常普遍的行为)时只会改变句柄中的实例数据指针，而reference本身就不需要修改。
