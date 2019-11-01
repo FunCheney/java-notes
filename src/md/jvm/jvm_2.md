@@ -5,6 +5,50 @@
 &ensp;&ensp;在Java中几乎所有的对象实例都存放在在堆中，垃圾收集器在对堆进行回收之前，第一件事情就是要确定这些对象之中有哪些还”存活“着。
 
 ##### 引用计数算法
-&ensp;&ensp;在判断对象是否存活：给对象添加一个引用计数器，每当有地方对这个对象有
+&ensp;&ensp;在判断对象是否存活：给对象添加一个引用计数器，每当有地方对这个对象有引用时，计数器的值就加1；当引用失效时，计数器的值就减1；任何时刻计数器为0的对象就是不可能被在使用的。
+
+**引用技术算法存在的问题：**
+
+&ensp;&ensp;很难解决对象之间相互循环引用的问题。以下面的示例代码：
+```java
+public class ReferenceCountingGc{
+    public Object instance = null;
+    private static final int _1MB = 1024 * 1024;
+    /**
+     * 这个成员属性的唯一意义就是占点内存，以便能在GC日志中查看是否被回收过 
+     */
+    private byte[] bigSize = new byte[_2MB];
+    
+    public static void testGc(){
+        ReferenceCountingGc objA = new ReferenceCountingGc();
+        ReferenceCountingGc objB = new ReferenceCountingGc();
+        objA.instance = objB;
+        objB.instance = objA;
+        
+        // 假设在这行发生GC，objA 和 objB 是否能被回收？
+        System.gc();
+    }
+}
+```
+&ensp;&ensp;在testGc()方法：对象objA和objB都有字段instance，赋值语句 objA.instance = objB及objB.instance = objA，除此之外两个对象再无任何应用，实际上这两个对象已经不可能再被访问，但是他们互相引用着对方，导致他们的计数都不为0，于是引用计数算法无法通知GC收集回收他们。
+
 
 ##### 可达性分析算法
+&ensp;&ensp;可达性分析算法就是通过一系列的称为“GC Roots”的对象作为起始点，从这些开始向下搜索，搜索所走过的路径称为引用链(Reference Chain),当一个对象到GC Roots没有任何引用链相连时，证明这个对象是不可用的。
+
+**GC Roots对象包含：**
+
+* 虚拟机栈(栈帧中的本地变量表)中引用的对象。
+
+* 方法区中类静态属性引用的对象。
+
+* 方法区中常量引用对象。
+
+* 本地方法栈中JNI(即一般说的Native方法)引用的对象。
+
+##### 对象的引用
+&ensp;&ensp;上面提到的两种对象是否存活的判断中提到的两种判断算法，都与对象的引用相关。Java中关于对象的引用在JDk1.2之前的定义：**如果reference类型的数据中存储的数值代表的是另外一块内存的起始地址，就称这块内存代表着一个引用**。这种定义很纯粹，但是太过于狭隘，一个对象在这种定义下只有被引用或者没有被引用两种状态，对于如何描述一些“食之无味，弃之可惜”的对象就显得无能为力。我们希望能描述这样一类对象：**当内存空间还足够时，则能保留在内存中；如果内存空间在进行垃圾收集后还非常紧张，则可抛弃这些对象**。
+
+&ensp;&ensp;在JDK1.2之后，Java对引用的概念进行了扩充，将引用分为强引用(Strong Reference)、软引用(Soft Reference)、弱引用(Weak Reference)、虚引用(Phantom Reference)四种，这四种引用强度依次逐渐减弱。
+
+
