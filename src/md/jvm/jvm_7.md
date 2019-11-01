@@ -9,6 +9,12 @@ public class Demo {
 }
 ```
 JVM参数如下配置：-verbose:gc -XX:+PrintGCDetails
+
+![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/jvm_001.pgn "JVM参数配置")
+
+打印GC日志：
+![image](https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/image/JVM.png "内存分配策略打印_001")
+
 #### 大对象直接分配到老年代
 
 
