@@ -255,6 +255,8 @@ Queue相关
 
 * [几种垃圾回收机制]
 
+* [内存分配策略]
+
 * [JVM中的Class文件]
 
 * [类加载机制]
@@ -264,6 +266,7 @@ Queue相关
 [各个模块的用途]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_1.md
 [JVM的gc概述]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_2.md
 [几种垃圾回收机制]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_3.md
+[内存分配策略]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_7.md
 [虚拟机分析工具]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_4.md
 [JVM中的Class文件]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_5.md
 [类加载机制]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_6.md
