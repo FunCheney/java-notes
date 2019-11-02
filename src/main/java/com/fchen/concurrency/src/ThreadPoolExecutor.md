@@ -57,15 +57,15 @@ workQueue：
 
 ### 线程池实例的状态
 
-RUNNING
+* RUNNING
 
-SHUTDOWN
+* SHUTDOWN
 
-STOP
+* STOP
 
-TIDYING
+* TIDYING
 
-TERMINATED
+* TERMINATED
 
 
 ### execute()方法
