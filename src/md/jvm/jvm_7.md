@@ -27,5 +27,6 @@ JVM参数如下配置：-verbose:gc -XX:+PrintGCDetails，这个收集器日志�
 
 
 #### 空间分配担保
+&ensp;&ensp;在发生Minor GC之前，虚拟机会先检查老年代最大的可用的连续空间是否大于新生代所有对象总空间，如果这个条件成立，那么Minor GC可以确保是线程安全的，如果不成立，则虚拟机会查看HandlerPromotionFailure设置值是否允许担保失败。如果允许，那么会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代的对象的平均大小，如果大于，将尝试着进行一次Minor GC，尽管这个Minor GC是有风险的；如果小于，或者HandlerPromotionFailure设置不允许冒险，那这时也要改为进行一次Full GC。
 #### 动态对象年龄判断
 &ensp;&ensp;为了能更好的适应不同程序的内存情况，虚拟机并不是永远地要求对象的年龄必须达到了MaxTenuringThreshold才能晋升到老年代，如果Survivor空间中相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代，无须等到MaxTenuringTheshold中要求的年龄。
