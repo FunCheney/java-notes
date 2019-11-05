@@ -261,6 +261,8 @@ Queue相关
 
 * [类加载机制]
 
+* [编译器优化]
+
 [初识JVM]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_0.md
 [Java中的对象]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/java_object.md
 [各个模块的用途]:https://github.com/FunCheney/concurrency/blob/master/src/md/jvm/jvm_1.md
