@@ -1,10 +1,8 @@
 package com.fchen.concurrency.example.concurrent.util;
 
 import lombok.extern.slf4j.Slf4j;
-import sun.rmi.runtime.Log;
 
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
