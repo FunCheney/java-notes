@@ -3,6 +3,7 @@ HELP.md
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 
+
 ### STS ###
 .apt_generated
 .classpath
@@ -11,6 +12,14 @@ HELP.md
 .settings
 .springBeans
 .sts4-cache
+.DS_Store
+ src/.DS_Store
+
+src/main/.DS_Store
+src/main/java/.DS_Store
+src/main/java/com/.DS_Store
+src/main/java/com/fchen/.DS_Store
+
 
 ### IntelliJ IDEA ###
 .idea

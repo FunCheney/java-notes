@@ -2,10 +2,8 @@ package com.fchen.concurrency.example.unsafe;
 
 import com.fchen.concurrency.annoations.ThreadSafe;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
+import java.text.DateFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,8 +18,6 @@ import java.util.concurrent.Semaphore;
 @Slf4j
 @ThreadSafe
 public class DateRelation3 {
-
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd");
 
     //请求总数
     public static int clientTotal = 5000;
@@ -55,6 +51,5 @@ public class DateRelation3 {
     }
 
     public static  void add(){
-        log.info("{}",DateTime.parse("20190512",dateTimeFormatter).toDate());
     }
 }
