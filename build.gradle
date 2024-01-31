@@ -23,11 +23,6 @@ repositories {
 }
 
 dependencies {
-	compile 'org.springframework.boot:spring-boot-starter-web'
-//	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-	testCompile 'org.springframework.boot:spring-boot-starter-test'
-	compile("org.projectlombok:lombok:1.18.2")
-	compile group: 'joda-time', name: 'joda-time', version: '2.10.1'
 	implementation 'com.google.guava:guava:23.0'
 	implementation "org.projectlombok:lombok:1.18.2"
 	annotationProcessor "org.projectlombok:lombok:1.18.2"
