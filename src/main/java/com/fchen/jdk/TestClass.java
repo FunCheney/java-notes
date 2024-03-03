@@ -1,3 +1,5 @@
+package com.fchen.jdk;
+
 public class TestClass{
 	private int m;
 
