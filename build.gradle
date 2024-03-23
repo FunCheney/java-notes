@@ -25,7 +25,9 @@ repositories {
 dependencies {
 	implementation 'com.google.guava:guava:23.0'
 	implementation "org.projectlombok:lombok:1.18.2"
+	implementation 'junit:junit:4.13.1'
 	annotationProcessor "org.projectlombok:lombok:1.18.2"
 	testAnnotationProcessor "org.projectlombok:lombok:1.18.2"
 	implementation 'ch.qos.logback:logback-classic:1.2.6'
+	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
