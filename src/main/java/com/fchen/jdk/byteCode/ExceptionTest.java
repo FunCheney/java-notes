@@ -1,5 +1,7 @@
 package com.fchen.jdk.byteCode;
 
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,5 +34,19 @@ public class ExceptionTest {
         }catch (RuntimeException e){
             e.printStackTrace();
         }
+    }
+
+    public static String func(){
+        String s = "hello";
+        try {
+            return "s1";
+        }finally {
+            return "s2";
+        }
+    }
+
+    public static void main(String[] args) {
+        String s = func();
+        System.out.println(s);
     }
 }
