@@ -1,4 +1,4 @@
-package com.fchen.jdk.runTimeArea;
+package com.fchen.jdk.runTimeArea.stack;
 
 public class StackTest {
     public static void main(String[] args) {

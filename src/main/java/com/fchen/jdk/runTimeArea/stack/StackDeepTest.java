@@ -1,4 +1,4 @@
-package com.fchen.jdk.runTimeArea;
+package com.fchen.jdk.runTimeArea.stack;
 
 public class StackDeepTest {
     private static int count=0;
@@ -6,6 +6,12 @@ public class StackDeepTest {
         count++;
         recursion();
     }
+
+    /**
+     *
+     * 置栈的大小:-Xss256K
+     * @param args
+     */
     public static void main(String args[]){
         try{
             recursion();
