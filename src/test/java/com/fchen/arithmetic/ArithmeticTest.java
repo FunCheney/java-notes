@@ -1,4 +1,4 @@
-package com.fchen.jdk.byteCode;
+package com.fchen.arithmetic;
 
 import org.junit.Test;
 
