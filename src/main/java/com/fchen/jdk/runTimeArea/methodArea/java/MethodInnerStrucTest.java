@@ -1,4 +1,4 @@
-package com.fchen.jdk.runTimeArea.methodArea;
+package com.fchen.jdk.runTimeArea.methodArea.java;
 
 import java.io.Serializable;
 
